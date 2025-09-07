@@ -6,15 +6,14 @@ dotenv.config();
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
-  apikey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.FIREBASE_API_KEY, // Fixed: was 'apikey'
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
   projectId: process.env.FIREBASE_PROJECT_ID,
   appId: process.env.FIREBASE_APP_ID,
-
 };
 
 // Validate required configuration for authentication
-const requiredFields = ['apikey', 'authDomain', 'projectId', 'appId'];
+const requiredFields = ['apiKey', 'authDomain', 'projectId', 'appId']; // Fixed: was 'apikey'
 const missingFields = requiredFields.filter(field => !firebaseConfig[field as keyof typeof firebaseConfig]);
 
 if (missingFields.length > 0) {
