@@ -1,16 +1,24 @@
 {
-  "name": "firebase",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "@repo/firebase",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./auth": "./auth.ts"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "scripts": {
+    "build": "tsc -b tsconfig.json",
+    "dev": "tsc --watch",
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
   "dependencies": {
-    "firebase": "^12.2.1",
-    "firebase-admin": "^13.5.0"
+    "dotenv": "^17.2.2",
+    "firebase": "^12.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3"
   }
 }
