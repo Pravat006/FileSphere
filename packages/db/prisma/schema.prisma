@@ -7,3 +7,67 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id           String           @id @default(cuid())
+  firebaseUid  String           @unique
+  email        String           @unique
+  name         String?
+  plan         SubscriptionPlan @default(FREE)
+  folders      Folder[]
+  storageUsed  Int              @default(0) // in bytes
+  storageLimit Int              @default(1073741824) // Default 1 GB free (1*1024*1024*1024)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([email]) // For login and user lookup
+  @@index([firebaseUid]) // For auth system
+  @@map("users") // Consistent table naming
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  // delete all the folders if a user is deleted
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String
+  files     File[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId]) // For querying all folders of a user
+  @@map("folders") // Consistent table naming
+}
+
+model File {
+  id         String   @id @default(cuid())
+  filename   String // "abc123.pdf" (what system stores it as)
+  cloudUrl   String   @unique
+  size       Int // in bytes
+  type       FileType
+  // delete all files if a folder is deleted
+  folder     Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId   String
+  mimeType   String // "application/pdf", "image/jpeg", etc.
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([folderId]) // For querying all files in a folder
+  @@index([type]) // For querying files by type
+  @@index([uploadedAt]) // For querying recent uploads
+  @@map("files") // Consistent table naming
+}
+
+enum FileType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}

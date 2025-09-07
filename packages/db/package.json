@@ -1,9 +1,16 @@
 {
-  "name": "db",
+  "name": "@repo/db",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -b"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
   },
   "keywords": [],
   "author": "",
