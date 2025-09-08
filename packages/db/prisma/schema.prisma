@@ -13,6 +13,7 @@ model User {
   firebaseUid  String           @unique
   email        String           @unique
   name         String?
+  role         Role             @default(USER)
   plan         SubscriptionPlan @default(FREE)
   folders      Folder[]
   storageUsed  Int              @default(0) // in bytes
@@ -57,6 +58,11 @@ model File {
   @@index([type]) // For querying files by type
   @@index([uploadedAt]) // For querying recent uploads
   @@map("files") // Consistent table naming
+}
+
+enum Role {
+  USER
+  ADMIN
 }
 
 enum FileType {
