@@ -9,55 +9,119 @@ datasource db {
 }
 
 model User {
-  id           String           @id @default(cuid())
-  firebaseUid  String           @unique
-  email        String           @unique
-  name         String?
-  role         Role             @default(USER)
-  plan         SubscriptionPlan @default(FREE)
-  folders      Folder[]
-  storageUsed  Int              @default(0) // in bytes
-  storageLimit Int              @default(1073741824) // Default 1 GB free (1*1024*1024*1024)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  id            String                @id @default(cuid())
+  firebaseUid   String                @unique
+  email         String                @unique
+  name          String?
+  role          Role                  @default(USER)
+  planId        String
+  plan          SubscriptionPlan      @relation(fields: [planId], references: [id])
+  folders       Folder[]
+  storageUsed   Int                   @default(0) // in bytes
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  subscriptions SubscriptionHistory[]
 
-  @@index([email]) // For login and user lookup
-  @@index([firebaseUid]) // For auth system
-  @@map("users") // Consistent table naming
+  // One-to-One: Each user has exactly one trash container
+  trash FileTrash? // Optional because it might not exist yet
+
+  @@index([email])
+  @@index([firebaseUid])
+  @@map("users")
 }
 
 model Folder {
   id        String   @id @default(cuid())
   name      String
-  // delete all the folders if a user is deleted
   owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId   String
   files     File[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([ownerId]) // For querying all folders of a user
-  @@map("folders") // Consistent table naming
+  @@index([ownerId])
+  @@map("folders")
 }
 
 model File {
   id         String   @id @default(cuid())
-  filename   String // "abc123.pdf" (what system stores it as)
+  filename   String
   cloudUrl   String   @unique
-  size       Int // in bytes
+  size       Int
   type       FileType
-  // delete all files if a folder is deleted
-  folder     Folder   @relation(fields: [folderId], references: [id], onDelete: Cascade)
-  folderId   String
-  mimeType   String // "application/pdf", "image/jpeg", etc.
+  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId   String? //  Optional when file is in trash
+  mimeType   String
   uploadedAt DateTime @default(now())
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  @@index([folderId]) // For querying all files in a folder
-  @@index([type]) // For querying files by type
-  @@index([uploadedAt]) // For querying recent uploads
-  @@map("files") // Consistent table naming
+  //Trash relationship: Many files can be in one trash
+  trash     FileTrash? @relation(fields: [trashId], references: [id])
+  trashId   String? // Files in trash have this set
+  // flag the indicates if the file is in trash or not
+  // If trashId is null, the file is not in trash
+  isInTrash Boolean    @default(false)
+
+  // Metadata for restoration
+  originalFolderId String? // Where to restore the file
+  deletedAt        DateTime? // When it was deleted
+
+  @@index([folderId])
+  @@index([trashId]) //Index for trash queries
+  @@index([type])
+  @@index([uploadedAt])
+  @@index([mimeType])
+  @@map("files")
+}
+
+model SubscriptionPlan {
+  id                  String                @id @default(cuid())
+  type                Plan                  @default(FREE)
+  price               Int                   @default(0)
+  storageLimit        Int                   @default(1073741824) // in bytes
+  features            String[]              @default([]) // List of features included in the plan
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  User                User[]
+  SubscriptionHistory SubscriptionHistory[]
+
+  @@map("subscription_plans") // Consistent table naming
+}
+
+model SubscriptionHistory {
+  id            String           @id @default(cuid())
+  userId        String
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId        String
+  plan          SubscriptionPlan @relation(fields: [planId], references: [id])
+  startDate     DateTime         @default(now())
+  endDate       DateTime? // null = currently active subscription
+  transactionId String?          @unique
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([planId])
+  @@index([startDate]) // For date range queries
+  @@index([endDate]) // For finding active subscriptions
+  @@map("subscription_history")
+}
+
+model FileTrash {
+  id String @id @default(cuid())
+
+  // One-to-One: Each trash belongs to exactly one user
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String @unique // Ensures one-to-one relationship
+
+  // One-to-Many: One trash can contain many files
+  files File[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("file_trash")
 }
 
 enum Role {
@@ -72,7 +136,7 @@ enum FileType {
   DOCUMENT
 }
 
-enum SubscriptionPlan {
+enum Plan {
   FREE
   PRO
   ENTERPRISE
