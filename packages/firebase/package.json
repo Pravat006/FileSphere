@@ -4,8 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./index.ts",
-    "./auth": "./auth.ts"
+    "./client": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts"
+    },
+    "./admin": {
+      "import": "./dist/admin.js",
+      "types": "./dist/admin.d.ts"
+    }
   },
   "scripts": {
     "build": "tsc -b tsconfig.json",

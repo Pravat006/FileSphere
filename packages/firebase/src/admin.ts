@@ -27,10 +27,10 @@ if (!getApps().length || process.env.NODE_ENV === 'development') {
         initializeApp({
             credential: cert(serviceAccount)
         })
-        console.log('✅ Firebase Admin initialized successfully');
-        // export const adminAuth = getAuth();
+        console.log('Firebase Admin initialized successfully');
+
     } catch (error) {
-        console.error('❌ Firebase Admin initialization failed:', error);
+        console.error('Firebase Admin initialization failed:', error);
     }
 }
 
