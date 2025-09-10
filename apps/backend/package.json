@@ -15,6 +15,7 @@
   "dependencies": {
     "@repo/db": "workspace:*",
     "@repo/firebase": "workspace:*",
+    "@repo/shared": "workspace:*",
     "@types/express": "^5.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
