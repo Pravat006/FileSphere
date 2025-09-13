@@ -7,8 +7,6 @@ interface Folder {
 
 interface CreateFolderRequest {
     name: string;
-    ownerId: string; // user id
-
 }
 interface UpdateFolderRequest {
     name?: string;
