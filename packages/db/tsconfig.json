@@ -4,30 +4,17 @@
     "module": "ESNext",
     "lib": ["ES2022"],
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": true,
-    "noEmit": true,
-    "isolatedModules": true,
+    "declaration": true,
     "sourceMap": true,
-    "baseUrl": "./",
-    "typeRoots": ["prisma/node_modules/@types", "./src/@types"],
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "types": ["node"]
   },
-  "include": ["src", "src/types"],
-  "exclude": ["prisma/node_modules", "dist"]
+  "include": ["src/**/*"],
+  "exclude": ["dist", "node_modules"]
 }

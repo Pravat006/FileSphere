@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc -b"
+    "build": "tsc -b tsconfig.json",
+    "prisma:migrate": "prisma migrate dev"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./client": {
+    ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.js"
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "keywords": [],
