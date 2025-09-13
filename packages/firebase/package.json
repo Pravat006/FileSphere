@@ -3,14 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     "./client": {
       "import": "./dist/client.js",
-      "types": "./dist/client.d.ts"
+      "types": "./dist/client.d.ts",
+      "require": "./dist/client.js"
     },
     "./admin": {
       "import": "./dist/admin.js",
-      "types": "./dist/admin.d.ts"
+      "types": "./dist/admin.d.ts",
+      "require": "./dist/admin.js"
     }
   },
   "scripts": {
