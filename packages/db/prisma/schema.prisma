@@ -14,12 +14,12 @@ model User {
   email         String                @unique
   name          String?
   role          Role                  @default(USER)
-  planId        String
-  plan          SubscriptionPlan      @relation(fields: [planId], references: [id])
+  planId        String?
+  plan          SubscriptionPlan?     @relation(fields: [planId], references: [id])
   folders       Folder[]
-  storageUsed   BigInt                @default(0) // in bytes
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+  storageUsed   BigInt?               @default(0) // in bytes
+  createdAt     DateTime?             @default(now())
+  updatedAt     DateTime?             @updatedAt
   subscriptions SubscriptionHistory[]
 
   // One-to-One: Each user has exactly one trash container
