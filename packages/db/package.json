@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -b tsconfig.json",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:migrate": "prisma migrate dev",
+    "generate": "prisma generate"
   },
   "exports": {
     ".": {
@@ -18,12 +19,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^6.15.0",
-    "@prisma/extension-accelerate": "^2.0.2",
-    "prisma": "^6.15.0"
+    "@prisma/client": "^6.16.1",
+    "@prisma/extension-accelerate": "^2.0.2"
   },
   "devDependencies": {
     "@types/node": "^22.15.3",
+    "prisma": "^6.16.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   }
