@@ -22,3 +22,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.env
+.env.local
+.env.*.local
+coverage
+.cache
+.next
+out
+build
+out-tsc
+temp
+tmp
+*.tsbuildinfo
+# Firebase cache
+.firebase
+
