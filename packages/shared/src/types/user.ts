@@ -4,6 +4,7 @@ interface User {
     firebaseUid: string;
     email: string;
     name: string;
+    storageUsed?: BigInt;
     role: 'ADMIN' | 'USER';
     createdAt: Date;
     updatedAt: Date;
