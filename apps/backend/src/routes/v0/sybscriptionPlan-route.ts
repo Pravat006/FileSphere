@@ -4,11 +4,11 @@ import verifyToken from "@/middlewares/auth-middleware"
 import { Router } from "express"
 
 const router = Router()
-router.use(verifyToken)
+// router.use(verifyToken)
 
-router.post('/subscriptionPlan', adminMiddleware, createSubscriptionPlan)
-router.get('/subscriptionPlan', getSubscriptionPlans)
-router.delete('/subscriptionPlan/:id', adminMiddleware, deleteSubscriptionPlan)
-router.put('/subscriptionPlan/:id', adminMiddleware, updateSubscriptionPlan)
+router.post('/subscriptionPlan', verifyToken, adminMiddleware, createSubscriptionPlan)
+router.get('/subscriptionPlan', verifyToken, getSubscriptionPlans)
+router.delete('/subscriptionPlan/:id', verifyToken, adminMiddleware, deleteSubscriptionPlan)
+router.put('/subscriptionPlan/:id', verifyToken, adminMiddleware, updateSubscriptionPlan)
 
 export default router

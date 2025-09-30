@@ -15,4 +15,4 @@ const adminMiddleware: RequestHandler = async (req, res, next) => {
         throw new Error('Error in admin middleware');
     }
 }
-export default adminMiddleware;
+export default adminMiddleware; 
