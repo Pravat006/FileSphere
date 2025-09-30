@@ -1,3 +1,4 @@
+import { ApiError } from "@/utils/api-error";
 import prisma from "@repo/db";
 import { CreateFolderRequest } from "@repo/shared"
 import { Request, Response } from "express";
@@ -5,6 +6,9 @@ import { Request, Response } from "express";
 const crateFolder = async (req: Request, res: Response) => {
     const { name } = req.body as CreateFolderRequest
     const userId = req.user?.id
+    if (!userId) {
+        throw new ApiError(401, "Unauthoried")
+    }
     const folder = await prisma.folder.create({
         data: {
             name,
@@ -45,6 +49,9 @@ const deleteFolder = async (req: Request, res: Response) => {
 
 const getFolders = async (req: Request, res: Response) => {
     const userId = req.user?.id
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized ! User not found")
+    }
     const folders = await prisma.folder.findMany({
         where: {
             ownerId: userId
@@ -89,10 +96,15 @@ const updateFolder = async (req: Request, res: Response) => {
 
 // getting a folder by it's id should also return all the files in that folder
 const getFolderById = async (req: Request, res: Response) => {
+    const userId = req.user?.id
+    if (!userId) {
+        throw new ApiError(401, "Unauthorized ! User id not found")
+    }
     const { id } = req.params
     const folder = await prisma.folder.findUnique({
         where: {
-            id
+            id,
+            ownerId: userId
         },
         include: {
             files: true
