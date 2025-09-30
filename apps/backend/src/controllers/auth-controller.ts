@@ -2,6 +2,8 @@ import getAuthToken from '@/helper/get-auth-token';
 import prisma from '@repo/db';
 import { RequestHandler } from 'express';
 import { serializeBigInt } from '@/utils/serialize-bigint';
+import { Prisma } from 'node_modules/@repo/db/generated/prisma';
+import { createAdminSchema } from '@repo/shared';
 
 const createNewUser: RequestHandler = async (req, res) => {
     try {
@@ -14,11 +16,9 @@ const createNewUser: RequestHandler = async (req, res) => {
             });
         }
 
-        // check the user in DB
+        // Check if user already exists
         let user = await prisma.user.findUnique({
-            where: {
-                firebaseUid: uid,
-            }
+            where: { firebaseUid: uid },
         });
 
         if (user) {
@@ -28,19 +28,9 @@ const createNewUser: RequestHandler = async (req, res) => {
             });
         }
 
-        // Create new user if not found
-        // search for free plan
-        // assign free plan to the user
-        // create a default folder named 'My Drive' for the user
-        // create a default subscription for the user
-        // start date is current date
-        // end date is null for free plan
-
         // Fetch the 'FREE' subscription plan
         const freePlan = await prisma.subscriptionPlan.findFirst({
-            where: {
-                type: 'FREE',
-            }
+            where: { type: 'FREE' }
         });
 
         if (!freePlan) {
@@ -50,41 +40,49 @@ const createNewUser: RequestHandler = async (req, res) => {
         }
 
 
-        // Create new user
-        user = await prisma.user.create({
-            data: {
-                firebaseUid: uid,
-                email: email || '',
-                name: name || null,
-                role: 'USER',
-                planId: freePlan.id,
-                // create a default folder named 'My Drive' for the user
-                folders: {
-                    create: {
-                        name: 'My Drive',
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+            // Create new user with related data
+            const newUser = await tx.user.create({
+                data: {
+                    firebaseUid: uid,
+                    email: email || '',
+                    name: name || null,
+                    role: 'USER',
+                    planId: freePlan.id,
+                    // Create trash container with user
+                    trash: {
+                        create: {}
+                    },
+                    folders: {
+                        create: {
+                            name: 'My Drive',
+                        }
+                    },
+                    subscriptions: {
+                        create: {
+                            planId: freePlan.id,
+                            startDate: new Date(),
+                        }
                     }
                 },
-                // create a default subscription for the user
-                subscriptions: {
-                    create: {
-                        planId: freePlan.id,
-                        startDate: new Date(),
-                    }
+                include: {
+                    plan: true,
+                    folders: true,
+                    subscriptions: true,
+                    trash: true
                 }
-            },
-            include: {
-                plan: true,
-                folders: true,
-                subscriptions: true
-            }
+            });
+
+            return newUser;
         });
 
         return res.status(201).json({
             message: 'User created successfully',
-            user: serializeBigInt(user)
+            user: serializeBigInt(result)
         });
 
     } catch (error) {
+        console.error('Error creating user:', error);
 
         if (error instanceof Error) {
             console.error('Error name:', error.name);
@@ -105,15 +103,23 @@ const createNewUser: RequestHandler = async (req, res) => {
                 message: error instanceof Error ? error.message : String(error),
                 code: error && typeof error === 'object' && 'code' in error ? (error as any).code : undefined,
                 details: error instanceof Error ? error.stack : undefined
-            } : undefined
+            } : { message: 'Internal server error' }
         });
     }
 };
 
 const createAdminUser: RequestHandler = async (req, res) => {
     try {
-        const { uid, email, name } = req.body;
+        const validationResult = createAdminSchema.safeParse(req.body);
+        if (!validationResult.success) {
+            return res.status(400).json({
+                message: 'Invalid request data',
+                errors: validationResult.error.errors
+            });
+        }
 
+        const { uid, email, name } = validationResult.data;
+        // LATER : implement zod validation
         // Validate required fields
         if (!uid) {
             return res.status(400).json({
