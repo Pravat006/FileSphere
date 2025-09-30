@@ -150,7 +150,7 @@ const createAdminUser: RequestHandler = async (req, res) => {
             data: {
                 firebaseUid: uid,
                 email: email,
-                name: name || null,
+                name: name,
                 role: 'ADMIN',
             }
         });
