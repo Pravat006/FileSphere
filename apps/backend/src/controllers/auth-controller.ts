@@ -50,9 +50,6 @@ const createNewUser: RequestHandler = async (req, res) => {
                     role: 'USER',
                     planId: freePlan.id,
                     // Create trash container with user
-                    trash: {
-                        create: {}
-                    },
                     folders: {
                         create: {
                             name: 'My Drive',
@@ -68,8 +65,7 @@ const createNewUser: RequestHandler = async (req, res) => {
                 include: {
                     plan: true,
                     folders: true,
-                    subscriptions: true,
-                    trash: true
+                    subscriptions: true
                 }
             });
 
