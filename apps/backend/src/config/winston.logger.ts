@@ -3,7 +3,7 @@ import { format, transports } from "winston";
 import path from "path";
 import fs from "fs";
 
-const { combine, timestamp, printf, colorize, errors, json, prettyPrint } = format;
+const { combine, timestamp, printf, colorize, errors, json } = format;
 
 // Ensure logs directory exists
 const logsDir = path.join(process.cwd(), "logs");
