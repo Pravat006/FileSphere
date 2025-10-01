@@ -392,6 +392,7 @@ const moveFileToAnotherFolder = async (req: Request, res: Response) => {
             where: {
                 id: fileId,
                 ownerId: userId,
+                isInTrash: false
             },
         })
         if (!file) {
@@ -434,7 +435,8 @@ const getAllFilesInFolder = async (req: Request, res: Response) => {
         const files = await prisma.file.findMany({
             where: {
                 folderId: folderId,
-                ownerId: userId
+                ownerId: userId,
+                isInTrash: false
             }
         })
         res.status(200).json({
@@ -462,6 +464,7 @@ const searchFilesByName = async (req: Request, res: Response) => {
         const files = await prisma.file.findMany({
             where: {
                 ownerId: userId,
+                isInTrash: false,
                 filename: {
                     contains: name,
                     mode: 'insensitive'
@@ -506,7 +509,8 @@ const sortFiles = async (req: Request, res: Response) => {
         }
         const files = await prisma.file.findMany({
             where: {
-                ownerId: userId
+                ownerId: userId,
+                isInTrash: false
             },
             orderBy: orderBy
         })
@@ -544,7 +548,8 @@ const downloadFile = async (req: Request, res: Response) => {
         const file = await prisma.file.findFirst({
             where: {
                 id: fileId,
-                ownerId: userId
+                ownerId: userId,
+                isInTrash: false
             }
         })
         if (!file) {
