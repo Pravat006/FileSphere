@@ -64,7 +64,7 @@ A significant portion of the core backend logic has been implemented in the Expr
 Clone the repository and install dependencies:
 
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/Pravat006/FileSphere.git
 cd FileSphere
 pnpm install
 ```
