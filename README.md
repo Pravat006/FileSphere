@@ -1,135 +1,102 @@
-# Turborepo starter
+# FileSphere - File Management System
 
-This Turborepo starter is maintained by the Turborepo core team.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
+FileSphere is a modern, scalable file management and storage application built on a Turborepo monorepo architecture. It features a robust backend API for handling file operations, user management, and subscription plans.
 
 ## What's inside?
 
 This Turborepo includes the following packages/apps:
 
-### Apps and Packages
+-   `apps/backend`: An [Express.js](https://expressjs.com/) server that handles all the business logic, API endpoints, and database interactions.
+-   `apps/web`: A [Next.js](https://nextjs.org/) app for the user-facing web client (frontend).
+-   `packages/db`: Contains the Prisma schema, generated client, and migration files for the PostgreSQL database.
+-   `packages/ui`: A stub React component library to be shared across web applications.
+-   `@repo/eslint-config`: Shared ESLint configurations.
+-   `@repo/typescript-config`: Shared `tsconfig.json` configurations.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Work Completed
 
-### Utilities
+Here is a summary of the development work and architectural decisions made so far:
 
-This Turborepo has some additional tools already setup for you:
+### 1. Database Schema Design & Refactoring
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+The entire database schema has been designed and implemented using **Prisma** with a PostgreSQL database.
 
-### Build
+-   **Core Models**: Created robust models for `User`, `Folder`, `File`, `SubscriptionPlan`, and `SubscriptionHistory`.
+-   **Schema Refactoring**: The initial `FileTrash` model was identified as redundant and has been **removed**.
+-   **Simplified Trash Logic**:
+    -   A direct `ownerId` relationship was added to the `File` model, ensuring every file has a clear owner, whether it's in a folder or in the trash. This simplifies ownership queries significantly.
+    -   The `File` model now includes `isInTrash: Boolean`, `deletedAt: DateTime?`, and `originalFolderId: String?` fields. This allows for moving files to and from the trash without data loss and enables easy restoration.
+-   **Database Migrations**: Successfully created and applied database migrations to reflect the schema changes.
 
-To build all apps and packages, run the following command:
+### 2. Backend API Development (`apps/backend`)
 
-```
-cd my-turborepo
+A significant portion of the core backend logic has been implemented in the Express.js application.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+-   **File Controllers (`file-controller.ts`)**:
+    -   **File Upload**: An endpoint to handle multipart file uploads, create file metadata in the database, and associate files with a user and an optional folder.
+    -   **File Retrieval**: Endpoints to get a list of all non-trashed files for a user (`getAllFiles`) and to retrieve a single file by its ID (`getFileById`).
+    -   **Trash Management**:
+        -   `moveFileToTrash`: An endpoint that moves a file to the trash by setting `isInTrash` to `true`, clearing its `folderId`, and recording its `originalFolderId` for potential restoration.
+        -   `deleteFileFromTrash`: An endpoint to permanently delete a file that is already in the trash.
+        -   `deleteFilePermanently`: A separate endpoint for immediate, permanent deletion of a file.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+### 3. Automated Background Jobs
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+-   **Automatic Trash Cleanup**:
+    -   A script (`jobs/cleanup-trash.ts`) has been created to automatically purge files that have been in the trash for a specified duration (e.g., 30 days).
+    -   This script is designed to be run by a **cron job**, ensuring the system automatically manages storage by deleting old, unwanted files.
+    -   **Important**: The script includes a placeholder for deleting files from the actual cloud storage provider, which is a critical next step.
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+---
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+## Getting Started
 
-### Develop
+### Prerequisites
 
-To develop all apps and packages, run the following command:
+-   [Node.js](https://nodejs.org/) (v18 or later)
+-   [pnpm](https://pnpm.io/installation) (recommended package manager)
+-   [PostgreSQL](https://www.postgresql.org/download/) database running
 
-```
-cd my-turborepo
+### 1. Setup
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+Clone the repository and install dependencies:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+```sh
+git clone <your-repo-url>
+cd FileSphere
+pnpm install
 ```
 
-### Remote Caching
+### 2. Environment Variables
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+Create a `.env` file in the `packages/db` directory and add your database connection string:
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+```env
+# packages/db/.env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### 3. Database Migration
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Apply the schema changes to your database:
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```sh
+pnpm exec prisma migrate dev
 ```
 
-## Useful Links
+### 4. Run Development Servers
 
-Learn more about the power of Turborepo:
+To run the backend and frontend applications in development mode:
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+```sh
+pnpm dev
+```
+
+You can also run a specific app:
+
+```sh
+# Run only the backend server
+pnpm dev --filter=backend
+```
