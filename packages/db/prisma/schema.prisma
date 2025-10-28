@@ -8,6 +8,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Admin {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  name              String
+  subscriptionPlans SubscriptionPlan[]
+}
+
 model User {
   id            String                @id @default(cuid())
   firebaseUid   String                @unique
@@ -17,14 +24,13 @@ model User {
   planId        String?
   plan          SubscriptionPlan?     @relation(fields: [planId], references: [id])
   folders       Folder[]
-  files         File[] // Add this relation
-  storageUsed   BigInt?               @default(0) // in bytes
-  createdAt     DateTime?             @default(now())
-  updatedAt     DateTime?             @updatedAt
+  files         File[]
+  transactions  Transaction[]
+  storageUsed   BigInt                @default(0) // in bytes
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
   subscriptions SubscriptionHistory[]
 
-  @@index([email])
-  @@index([firebaseUid])
   @@map("users")
 }
 
@@ -45,8 +51,8 @@ model File {
   id         String   @id @default(cuid())
   filename   String
   cloudUrl   String   @unique
-  size       Int
-  type       FileType
+  size       BigInt
+  fileType   FileType
   owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId    String
   folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
@@ -63,27 +69,27 @@ model File {
   originalFolderId String? // Where to restore the file
   deletedAt        DateTime? // When it was deleted
 
-  @@index([ownerId])
   @@index([folderId])
-  @@index([type])
+  @@index([ownerId, isInTrash])
   @@index([uploadedAt])
-  @@index([mimeType])
   @@map("files")
 }
 
 model SubscriptionPlan {
   id                  String                @id @default(cuid())
-  type                Plan                  @default(FREE)
+  planType            Plan                  @default(FREE)
   price               Int                   @default(0)
   storageLimit        BigInt                @default(1073741824) // in bytes
   features            String[]              @default([]) // List of features included in the plan
   // durationInDays     Int                   @default(30) // Duration of the plan in days
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  User                User[]
-  SubscriptionHistory SubscriptionHistory[]
+  users               User[]
+  subscriptionHistory SubscriptionHistory[]
+  createdBy           Admin                 @relation(fields: [adminId], references: [id])
+  adminId             String
 
-  @@map("subscription_plans") // Consistent table naming
+  @@map("subscription_plans")
 }
 
 model SubscriptionHistory {
@@ -93,16 +99,36 @@ model SubscriptionHistory {
   planId        String
   plan          SubscriptionPlan @relation(fields: [planId], references: [id])
   startDate     DateTime         @default(now())
-  endDate       DateTime? // null = currently active subscription
+  endDate       DateTime?
   transactionId String?          @unique
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  transaction   Transaction?     @relation("TransactionToSubscription", fields: [transactionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([planId])
-  @@index([startDate]) // For date range queries
-  @@index([endDate]) // For finding active subscriptions
+  @@index([startDate])
   @@map("subscription_history")
+}
+
+model Transaction {
+  id                  String               @id @default(cuid())
+  price               Int
+  subscriptionHistory SubscriptionHistory? @relation("TransactionToSubscription")
+  ownerId             String
+  owner               User                 @relation(fields: [ownerId], references: [id])
+  status              TransactionStatus    @default(PENDING)
+
+  razorpayOrderId   String?  @unique
+  razorpayPaymentId String?  @unique
+  razorpaySignature String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([createdAt])
+  @@index([ownerId])
+  @@map("transactions")
 }
 
 enum Role {
@@ -121,4 +147,11 @@ enum Plan {
   FREE
   PRO
   ENTERPRISE
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
 }
