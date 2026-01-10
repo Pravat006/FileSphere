@@ -5,13 +5,15 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model Admin {
   id                String             @id @default(cuid())
   email             String             @unique
   name              String
+  password          String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
   subscriptionPlans SubscriptionPlan[]
 }
 
@@ -20,7 +22,6 @@ model User {
   firebaseUid   String                @unique
   email         String                @unique
   name          String?
-  role          Role                  @default(USER)
   planId        String?
   plan          SubscriptionPlan?     @relation(fields: [planId], references: [id])
   folders       Folder[]
@@ -35,32 +36,39 @@ model User {
 }
 
 model Folder {
-  id        String   @id @default(cuid())
-  name      String
-  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId   String
-  files     File[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(cuid())
+  name           String
+  owner          User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId        String
+  parentFolderId String?
+  parentFolder   Folder?  @relation("SubFolders", fields: [parentFolderId], references: [id], onDelete: Cascade)
+  subFolders     Folder[] @relation("SubFolders")
+  files          File[]   @relation("FileFolder")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([ownerId])
+  @@index([parentFolderId])
   @@map("folders")
 }
 
 model File {
-  id         String   @id @default(cuid())
+  id         String     @id @default(cuid())
   filename   String
-  cloudUrl   String   @unique
+  storageKey String     @unique
+  bucket     String?
+  region     String?
+  access     FileAccess @default(PUBLIC)
   size       BigInt
   fileType   FileType
-  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId    String
-  folder     Folder?  @relation(fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
+  folder     Folder?    @relation("FileFolder", fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
   folderId   String? //  Optional when file is in trash
   mimeType   String
-  uploadedAt DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  uploadedAt DateTime   @default(now())
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
   // flag that indicates if the file is in trash or not
   isInTrash Boolean @default(false)
@@ -131,11 +139,6 @@ model Transaction {
   @@map("transactions")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
 enum FileType {
   IMAGE
   VIDEO
@@ -154,4 +157,9 @@ enum TransactionStatus {
   SUCCESS
   FAILED
   REFUNDED
+}
+
+enum FileAccess {
+  PUBLIC
+  PRIVATE
 }
