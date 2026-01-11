@@ -32,8 +32,11 @@ export const planTypeEnum = z.enum(["FREE", "PRO", "ENTERPRISE"])
 
 export const FileTypeEnum = z.enum(["IMAGE", "VIDEO", "AUDIO", "DOCUMENT"])
 
+export const FileAccessEnum = z.enum(["PUBLIC", "PRIVATE"])
+
 export const TransactionStatusEnum = z.enum(["PENDING", "SUCCESS", "FAILED", "REFUNDED"])
 
 export type PlanType = z.infer<typeof planTypeEnum>
 export type FileType = z.infer<typeof FileTypeEnum>
+export type FileAccess = z.infer<typeof FileAccessEnum>
 export type TransactionStatus = z.infer<typeof TransactionStatusEnum>

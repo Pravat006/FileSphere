@@ -36,3 +36,7 @@ export type SubscriptionSchema = z.infer<typeof subscriptionSchema>;
 export type SubscriptionPlanSchema = z.infer<typeof subscriptionPlanSchema>;
 export type CreateSubscriptionPlanSchema = z.infer<typeof createSubscriptionPlanSchema>;
 export type UpdateSubscriptionPlanSchema = z.infer<typeof updateSubscriptionPlanSchema>;
+
+// Request types for backend
+export type CreateSubscriptionPlanRequest = CreateSubscriptionPlanSchema;
+export type UpdateSubscriptionPlanRequest = UpdateSubscriptionPlanSchema;

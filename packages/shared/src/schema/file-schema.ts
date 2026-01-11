@@ -1,10 +1,13 @@
-import { allowedMimeTypes, FileTypeEnum } from "@/constants";
+import { allowedMimeTypes, FileTypeEnum, FileAccessEnum } from "@/constants";
 import { z } from "zod";
 
 export const fileSchema = z.object({
     id: z.string().cuid(),
     filename: z.string().min(1),
-    cloudUrl: z.string().url(),
+    storageKey: z.string().min(1),
+    bucket: z.string().nullable(),
+    region: z.string().nullable(),
+    access: FileAccessEnum.default("PUBLIC"),
     size: z.bigint().nonnegative(),
     fileType: FileTypeEnum,
     ownerId: z.string().cuid(),
@@ -16,13 +19,16 @@ export const fileSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     isInTrash: z.boolean().default(false),
-    originalFolderId: z.string().cuid().optional(),
-    deletedAt: z.date().optional(),
+    originalFolderId: z.string().cuid().nullable(),
+    deletedAt: z.date().nullable(),
 })
 
 export const createFileSchema = z.object({
     filename: z.string().min(1, "Filename is required"),
-    cloudUrl: z.string().url("Invalid URL"),
+    storageKey: z.string().min(1, "Storage key is required"),
+    bucket: z.string().optional(),
+    region: z.string().optional(),
+    access: FileAccessEnum.default("PUBLIC"),
     size: z.bigint().nonnegative(),
     fileType: FileTypeEnum,
     ownerId: z.string().cuid(),

@@ -1,11 +1,10 @@
-import { planTypeEnum } from "@/constants";
 import z from "zod";
 
 export const createSubscriptionHistorySchema = z.object({
     userId: z.string().cuid(),
     planId: z.string().cuid(),
-    startDate: z.date(),
-    endDate: z.date(),
+    startDate: z.date().optional(), // defaults to now() in DB
+    endDate: z.date().optional(),
     transactionId: z.string().cuid().optional()
 })
 
