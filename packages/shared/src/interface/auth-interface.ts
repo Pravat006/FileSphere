@@ -5,9 +5,9 @@ export interface IAdmin {
     id: string;
     email: string;
     name: string;
-    password?: string; // Should be handled carefully, usually not sent to frontend
-    createdAt: Date;
-    updatedAt: Date;
+    password?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
     subscriptionPlans?: ISubscriptionPlan[];
 }
 

@@ -5,24 +5,20 @@ import { serializeBigInt } from "@/utils/serialize-bigint";
 
 const createSubscriptionPlan = async (req: Request, res: Response) => {
     try {
-        const { type, price, storageLimit, features } = req.body as CreateSubscriptionPlanRequest
+        const { type, price, storageLimit, features } = req.body as CreateSubscriptionPlanRequest;
 
-        console.log('Creating plan with data:', { type, price, storageLimit, features });
-
-        // check if there is plan exist before with same subscription plan type
         const existingPlan = await prisma.subscriptionPlan.findFirst({
-            where: {
-                type: type
-            }
-        })
+            where: { type: type }
+        });
 
         if (existingPlan) {
-            return res.status(400).json({
+            return res.status(409).json({
                 "success": false,
-                "message": "Subscription plan with this type already exists"
-            })
+                "message": `Subscription plan with type '${type}' already exists.`
+            });
         }
 
+        // Create the plan with its absolute, final storage limit.
         const plan = await prisma.subscriptionPlan.create({
             data: {
                 type,
@@ -30,13 +26,13 @@ const createSubscriptionPlan = async (req: Request, res: Response) => {
                 storageLimit,
                 features
             }
-        })
+        });
 
-        res.status(201).json({
+        return res.status(201).json({
             "success": true,
             "data": serializeBigInt(plan),
-            "message": "Subscription plan created successfully"
-        })
+            "message": "Subscription plan created successfully."
+        });
 
     } catch (error) {
         console.error('Error creating subscription plan:', error);

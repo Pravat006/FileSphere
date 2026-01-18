@@ -1,13 +1,8 @@
 
+import { FileType } from '@/constants';
 import { IUser } from './auth-interface';
 
-// Enums
-export enum FileType {
-    IMAGE = 'IMAGE',
-    VIDEO = 'VIDEO',
-    AUDIO = 'AUDIO',
-    DOCUMENT = 'DOCUMENT'
-}
+
 
 // Interfaces
 export interface IFolder {

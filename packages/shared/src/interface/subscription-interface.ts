@@ -1,23 +1,11 @@
+import { PlanType, TransactionStatus } from '@/constants';
 import { IUser, IAdmin } from './auth-interface';
 
-// Enums
-export enum Plan {
-    FREE = 'FREE',
-    PRO = 'PRO',
-    ENTERPRISE = 'ENTERPRISE'
-}
-
-export enum TransactionStatus {
-    PENDING = 'PENDING',
-    SUCCESS = 'SUCCESS',
-    FAILED = 'FAILED',
-    REFUNDED = 'REFUNDED'
-}
 
 // Interfaces
 export interface ISubscriptionPlan {
     id: string;
-    planType: Plan;
+    planType: PlanType;
     price: number;
     storageLimit: bigint;
     features: string[];
