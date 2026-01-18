@@ -11,6 +11,7 @@ const getAuthToken = async (req: Request) => {
 
     try {
         const decodedToken = await adminAuth.verifyIdToken(idToken);
+        console.log({ decodedToken })
         return decodedToken;
     } catch (error) {
         console.error('Error verifying ID token:', error);

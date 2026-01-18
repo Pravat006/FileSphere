@@ -1,9 +1,13 @@
-import { User } from "@repo/shared";
+import { IAdmin, IUser } from "@repo/shared";
+
+
 
 declare global {
     namespace Express {
         interface Request {
-            user?: User;
+            user?: Omit<IUser, 'firebaseUid' | 'createdAt' | 'updatedAt'>;
+            availableStorage?: BigInt;
+            admin?: IAdmin
         }
     }
 }

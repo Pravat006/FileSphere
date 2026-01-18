@@ -1,17 +1,25 @@
+import { authRouter } from "@/modules/auth/auth-route";
 import { Router } from "express";
-import v0Routes from "./v0";
 
-const router = Router();
+const router = Router()
 
-router.get("/health-check", (req, res) => {
-    console.log("Health check endpoint hit");
-    res.status(200).json({
-        status: "true",
-        message: "Server is healthy",
-        timestamp: new Date().toISOString()
-    });
-});
 
-router.use("/v0", v0Routes);
+type Route = {
+    path: string,
+    route: Router
+}
 
-export default router;
+const routeModules: Route[] = [
+
+    {
+        path: '/auth',
+        route: authRouter
+    }
+
+]
+
+routeModules.forEach((route) => {
+    router.use(route.path, route.route)
+})
+
+export default router
