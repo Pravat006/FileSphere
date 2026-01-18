@@ -53,22 +53,32 @@ model Folder {
 }
 
 model File {
-  id         String     @id @default(cuid())
-  filename   String
-  storageKey String     @unique
+  id       String @id @default(cuid())
+  filename String
+
+  access   FileAccess @default(PUBLIC)
+  size     BigInt
+  fileType FileType
+  owner    User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId  String
+  folder   Folder?    @relation("FileFolder", fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
+  folderId String? //  Optional when file is in trash
+  mimeType String
+
+  // cloud metadata
+  storageKey String  @unique
+  // bucket and region are optional for cloud migration in future
   bucket     String?
   region     String?
-  access     FileAccess @default(PUBLIC)
-  size       BigInt
-  fileType   FileType
-  owner      User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId    String
-  folder     Folder?    @relation("FileFolder", fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
-  folderId   String? //  Optional when file is in trash
-  mimeType   String
-  uploadedAt DateTime   @default(now())
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+
+  // Upload related fields
+  uploadStrategy UploadStrategy @default(SINGLE_PART)
+  uploadStatus   FileStatus     @default(INITIATED)
+  uploadId       String?
+
+  uploadedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // flag that indicates if the file is in trash or not
   isInTrash Boolean @default(false)
@@ -162,4 +172,15 @@ enum TransactionStatus {
 enum FileAccess {
   PUBLIC
   PRIVATE
+}
+
+enum UploadStrategy {
+  SINGLE_PART
+  MULTI_PART
+}
+
+enum FileStatus {
+  INITIATED
+  COMPLETED
+  FAILED
 }
