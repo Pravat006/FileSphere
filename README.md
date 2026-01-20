@@ -1,102 +1,107 @@
-# FileSphere - File Management System
+# FileSphere - Modern Cloud Storage System
 
-FileSphere is a modern, scalable file management and storage application built on a Turborepo monorepo architecture. It features a robust backend API for handling file operations, user management, and subscription plans.
+FileSphere is a high-performance, scalable file management and cloud storage platform built with a **Turborepo monorepo** architecture. It leverages modern technologies like Next.js, Express, Prisma, AWS S3, and Redis to provide a seamless file management experience.
 
-## What's inside?
+## 🏗️ Architecture & Packages
 
-This Turborepo includes the following packages/apps:
+This monorepo uses **PNPM Workspaces** and **Turbo** to manage dependencies and build pipelines.
 
--   `apps/backend`: An [Express.js](https://expressjs.com/) server that handles all the business logic, API endpoints, and database interactions.
--   `apps/web`: A [Next.js](https://nextjs.org/) app for the user-facing web client (frontend).
--   `packages/db`: Contains the Prisma schema, generated client, and migration files for the PostgreSQL database.
--   `packages/ui`: A stub React component library to be shared across web applications.
--   `@repo/eslint-config`: Shared ESLint configurations.
--   `@repo/typescript-config`: Shared `tsconfig.json` configurations.
+### Apps
+- **`apps/backend`**: Node.js/Express server handling core business logic, file processing, and API endpoints. High-performance caching is implemented with Redis.
+- **`apps/frontend`**: User-facing web client built with **Next.js 15** and **Tailwind CSS**, providing a responsive and interactive UI.
 
----
-
-## Work Completed
-
-Here is a summary of the development work and architectural decisions made so far:
-
-### 1. Database Schema Design & Refactoring
-
-The entire database schema has been designed and implemented using **Prisma** with a PostgreSQL database.
-
--   **Core Models**: Created robust models for `User`, `Folder`, `File`, `SubscriptionPlan`, and `SubscriptionHistory`.
--   **Schema Refactoring**: The initial `FileTrash` model was identified as redundant and has been **removed**.
--   **Simplified Trash Logic**:
-    -   A direct `ownerId` relationship was added to the `File` model, ensuring every file has a clear owner, whether it's in a folder or in the trash. This simplifies ownership queries significantly.
-    -   The `File` model now includes `isInTrash: Boolean`, `deletedAt: DateTime?`, and `originalFolderId: String?` fields. This allows for moving files to and from the trash without data loss and enables easy restoration.
--   **Database Migrations**: Successfully created and applied database migrations to reflect the schema changes.
-
-### 2. Backend API Development (`apps/backend`)
-
-A significant portion of the core backend logic has been implemented in the Express.js application.
-
--   **File Controllers (`file-controller.ts`)**:
-    -   **File Upload**: An endpoint to handle multipart file uploads, create file metadata in the database, and associate files with a user and an optional folder.
-    -   **File Retrieval**: Endpoints to get a list of all non-trashed files for a user (`getAllFiles`) and to retrieve a single file by its ID (`getFileById`).
-    -   **Trash Management**:
-        -   `moveFileToTrash`: An endpoint that moves a file to the trash by setting `isInTrash` to `true`, clearing its `folderId`, and recording its `originalFolderId` for potential restoration.
-        -   `deleteFileFromTrash`: An endpoint to permanently delete a file that is already in the trash.
-        -   `deleteFilePermanently`: A separate endpoint for immediate, permanent deletion of a file.
-
-### 3. Automated Background Jobs
-
--   **Automatic Trash Cleanup**:
-    -   A script (`jobs/cleanup-trash.ts`) has been created to automatically purge files that have been in the trash for a specified duration (e.g., 30 days).
-    -   This script is designed to be run by a **cron job**, ensuring the system automatically manages storage by deleting old, unwanted files.
-    -   **Important**: The script includes a placeholder for deleting files from the actual cloud storage provider, which is a critical next step.
+### Shared Packages (@repo/*)
+- **`packages/db`**: Database layer using **Prisma ORM** with PostgreSQL. Includes schema definitions and automated migrations.
+- **`packages/firebase`**: centralized authentication service providing both **Firebase Admin SDK** (for backend verification) and **Firebase Client SDK** (for frontend login).
+- **`packages/shared`**: Shared TypeScript interfaces, Zod schemas, validation logic, and constants used across the entire stack.
+- **`packages/ui`**: Reusable UI component library shared between frontend applications.
+- **`packages/typescript-config`**: Shared `tsconfig.json` configurations.
+- **`packages/eslint-config`**: Standardized ESLint rules for maintaining code quality.
 
 ---
 
-## Getting Started
+## 🚀 Core Features & Work Completed
+
+### 1. Advanced Storage Management
+- **AWS S3 Integration**: Integrated Amazon S3 for secure and scalable file storage.
+- **Smart Upload Strategy**: 
+    - **Single-Part Upload**: Fast uploads for smaller files via presigned URLs.
+    - **Multi-Part Upload**: Efficient handling of large files (100MB+) with chunked uploads and session management.
+- **Trash Lifecycle**: Robust "Soft-Delete" system. Files moved to trash retain metadata and original location for easy restoration.
+- **Auto-Cleanup**: Automated background jobs (cron-ready) to purge files from trash after a retention period.
+
+### 2. Performance & Caching
+- **Redis Integration**: Implemented Redis for lightning-fast user session caching.
+- **Quota Management**: Real-time storage limit checks are cached in Redis to prevent excessive database hits during large file uploads.
+
+### 3. Identity & Security
+- **Firebase Auth Integration**: Secure authentication flow using Firebase tokens.
+- **User Quota System**: Dynamic subscription plans (Free, Pro, Enterprise) with enforced storage limits and feature flags.
+
+### 4. Database Design
+- **Normalized Schema**: Optimized PostgreSQL schema with Prisma, handling complex relations between Users, Folders, Files, and Subscription Histories.
+- **Transaction Support**: Critical operations (like completing an upload or upgrading a plan) are wrapped in Prisma Transactions for data integrity.
+
+---
+
+## 🛠️ Getting Started
 
 ### Prerequisites
+- **Node.js**: v18 or later
+- **PNPM**: v9 or later (recommended)
+- **PostgreSQL**: Running instance
+- **Docker**: Optional (for running Redis/PostgreSQL locally)
 
--   [Node.js](https://nodejs.org/) (v18 or later)
--   [pnpm](https://pnpm.io/installation) (recommended package manager)
--   [PostgreSQL](https://www.postgresql.org/download/) database running
-
-### 1. Setup
-
-Clone the repository and install dependencies:
-
-```sh
+### 1. Installation
+```bash
 git clone https://github.com/Pravat006/FileSphere.git
 cd FileSphere
 pnpm install
 ```
 
-### 2. Environment Variables
+### 2. Environment Setup
+You will need to set up `.env` files in multiple locations:
 
-Create a `.env` file in the `packages/db` directory and add your database connection string:
-
+**Root `.env` (passed to apps):**
 ```env
-# packages/db/.env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+PORT=3000
+DATABASE_URL="postgresql://..."
+REDIS_URL="redis://localhost:6379"
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+S3_BUCKET_NAME=your_bucket
+```
+
+**Firebase Package `.env` (`packages/firebase/.env`):**
+```env
+# Client Side
+FIREBASE_API_KEY=your_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_id
+FIREBASE_APP_ID=your_app_id
+
+# Admin SDK (Backend)
+FIREBASE_ADMIN_PROJECT_ID=your_id
+FIREBASE_ADMIN_CLIENT_EMAIL=your_service_account
+FIREBASE_ADMIN_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
 ```
 
 ### 3. Database Migration
-
-Apply the schema changes to your database:
-
-```sh
+```bash
 pnpm exec prisma migrate dev
 ```
 
-### 4. Run Development Servers
-
-To run the backend and frontend applications in development mode:
-
-```sh
+### 4. Development
+Run the entire stack in development mode:
+```bash
 pnpm dev
 ```
-
-You can also run a specific app:
-
-```sh
-# Run only the backend server
+Run only the backend:
+```bash
 pnpm dev --filter=backend
 ```
+
+---
+
+## 📜 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
