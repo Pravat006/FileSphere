@@ -7,47 +7,38 @@
 // all user to upload the files size worth under the  available storage
 
 import { ApiError } from "@/interface";
-import db from "@/services/db";
 import type { NextFunction, Request, Response } from "express";
 import status from "http-status";
 
-const storageMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+const uploadQuotaMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const user = req.user;
         if (!user) {
             throw new ApiError(status.UNAUTHORIZED, "User not found");
         }
 
+        // Use the cached user data from Redis (populated in userAuthMiddleware)
         if (!user.plan) {
             throw new ApiError(status.NOT_FOUND, "User subscription plan not found");
         }
 
-        const freshUser = await db.user.findUnique({
-            where: { id: user.id },
-            select: {
-                storageUsed: true,
-                plan: true
-            }
-        });
+        // Ensure proper bigint conversion (req.user.storageUsed is already a BigInt from userAuthMiddleware)
+        const storageUsed = BigInt(user.storageUsed.toString());
+        const userStorageLimit = BigInt(user.plan.storageLimit.toString());
 
-        if (!freshUser) {
-            throw new ApiError(status.UNAUTHORIZED, "User not found");
-        }
+        // Get incoming file size from body (for initiate upload) or header (fallback)
+        const incomingSize = req.body.size ? BigInt(req.body.size) : BigInt(0);
 
-        if (!freshUser.plan) {
-            throw new ApiError(status.NOT_FOUND, "User subscription plan not found");
-        }
-
-        // Ensure proper bigint conversion
-        const storageUsed = freshUser.storageUsed ? BigInt(freshUser.storageUsed.toString()) : BigInt(0);
-        const userStorageLimit = BigInt(freshUser.plan.storageLimit.toString());
-
-        if (storageUsed >= userStorageLimit) {
-            return res.status(403).json({
+        if (storageUsed + incomingSize > userStorageLimit) {
+            return res.status(status.BAD_REQUEST).json({
                 success: false,
-                message: "Insufficient storage space. Please upgrade your plan or delete some files.",
+                message: incomingSize > 0
+                    ? "Insufficient storage space for this file."
+                    : "Insufficient storage space. Please upgrade your plan.",
                 storageUsed: storageUsed.toString(),
-                storageLimit: userStorageLimit.toString()
+                storageLimit: userStorageLimit.toString(),
+                requiredSpace: incomingSize.toString(),
+                availableSpace: (userStorageLimit - storageUsed).toString()
             });
         }
 
@@ -63,4 +54,4 @@ const storageMiddleware = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export { storageMiddleware };
+export { uploadQuotaMiddleware };

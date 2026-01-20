@@ -6,8 +6,9 @@ import { IUser } from "@repo/shared";
 import { ApiError } from "@/interface";
 import status from "http-status";
 import { redis } from "@/services/redis-service";
+import { serializeBigInt } from "@/utils/serialize-bigint";
 
-const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
+const userAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     const idToken = req.headers.authorization?.split('Bearer ')[1];
 
     if (!idToken) {
@@ -18,7 +19,12 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
         const decodedToken = await adminAuth.verifyIdToken(idToken);
         const uid = decodedToken.uid;
 
-        const cachedUser = await redis.get<any>(`user:${uid}`);
+        let cachedUser;
+        try {
+            cachedUser = await redis.get<any>(`user:${uid}`);
+        } catch (error) {
+            logger.error('Redis get error:', error);
+        }
 
         if (cachedUser) {
             const user = cachedUser;
@@ -44,8 +50,9 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
         }
         // logger.info("User found:", user);
 
-        const userObj: Omit<IUser, 'firebaseUid' | 'createdAt' | 'updatedAt'> = {
+        const userObj: Omit<IUser, 'createdAt' | 'updatedAt'> = {
             id: user.id,
+            firebaseUid: user.firebaseUid,
             name: user.name,
             email: user.email,
             plan: user.plan,
@@ -53,7 +60,12 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         // Cache the user object for 1 hour (3600 seconds)
-        await redis.set(`user:${uid}`, userObj, 3600);
+        // Serialize BigInt before caching
+        try {
+            await redis.set(`user:${uid}`, serializeBigInt(userObj), 3600);
+        } catch (redisError) {
+            logger.error('Redis cache error:', redisError);
+        }
 
         req.user = userObj;
         next();
@@ -63,4 +75,4 @@ const verifyToken = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-export default verifyToken;
+export default userAuthMiddleware;

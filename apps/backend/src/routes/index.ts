@@ -1,6 +1,6 @@
 import { authRouter } from "@/modules/auth/auth-route";
 import { Router } from "express";
-
+import { uploadRouter } from "@/modules/upload/upload-routes"
 const router = Router()
 
 
@@ -14,8 +14,11 @@ const routeModules: Route[] = [
     {
         path: '/auth',
         route: authRouter
+    },
+    {
+        path: '/upload',
+        route: uploadRouter
     }
-
 ]
 
 routeModules.forEach((route) => {

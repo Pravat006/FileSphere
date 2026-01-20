@@ -1,4 +1,4 @@
-import { initializeApp, ServiceAccount, getApps, cert } from "firebase-admin/app";
+import { initializeApp, ServiceAccount, getApps, cert, App } from "firebase-admin/app";
 import { getAuth, DecodedIdToken } from "firebase-admin/auth";
 import dotenv from "dotenv";
 import path from "path";
@@ -22,12 +22,16 @@ if (missingAdminFields.length > 0) {
     throw new Error("Firebase Admin configuration is incomplete");
 }
 
+let admin: App;
+
 if (!getApps().length) {
-    initializeApp({
+    admin = initializeApp({
         credential: cert(serviceAccount),
     });
     console.log("Firebase Admin initialized successfully");
+} else {
+    admin = getApps()[0];
 }
 
-export const adminAuth = getAuth();
-export { DecodedIdToken };
+export const adminAuth = getAuth(admin);
+export { admin, DecodedIdToken };
