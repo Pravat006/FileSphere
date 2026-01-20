@@ -1,4 +1,4 @@
-import { planTypeEnum } from "@/constants";
+import { planTypeEnum } from "../constants";
 import z from "zod";
 
 

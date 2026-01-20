@@ -1,4 +1,4 @@
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import {
     getAuth,
     Auth,
@@ -9,7 +9,6 @@ import {
     User
 } from "firebase/auth";
 
-// Define the config type for clarity
 export interface FirebaseClientConfig {
     apiKey: string | undefined;
     authDomain: string | undefined;
@@ -17,28 +16,42 @@ export interface FirebaseClientConfig {
     appId: string | undefined;
 }
 
-// These will be initialized later
 let auth: Auth;
-const googleProvider = new GoogleAuthProvider();
-
-
-//  Initializes the Firebase client app. This must be called once in your application's entry point.
+let googleProvider: GoogleAuthProvider;
 
 export const initializeFirebaseClient = (config: FirebaseClientConfig) => {
-    if (auth) {
-        console.warn("Firebase client already initialized.");
-        return;
+    if (typeof window === "undefined") return;
+
+    let app: FirebaseApp;
+    if (getApps().length === 0) {
+        app = initializeApp(config);
+    } else {
+        app = getApp();
     }
-    const app: FirebaseApp = initializeApp(config);
-    auth = getAuth(app);
-    console.log("Firebase Client Initialized");
+
+    if (!auth) {
+        auth = getAuth(app);
+    }
+
+    if (!googleProvider) {
+        googleProvider = new GoogleAuthProvider();
+    }
+
+    return auth;
 };
 
-
-// This helper ensures that if auth has been initialized before use.
 const ensureAuthInitialized = () => {
+    if (typeof window === "undefined") return;
     if (!auth) {
-        throw new Error("Firebase client has not been initialized. Please call initializeFirebaseClient in your app's entry point (e.g., main.tsx).");
+        // In case it hasn't been initialized yet, we try to get it from the default app
+        if (getApps().length > 0) {
+            auth = getAuth(getApp());
+        } else {
+            throw new Error("Firebase client has not been initialized.");
+        }
+    }
+    if (!googleProvider) {
+        googleProvider = new GoogleAuthProvider();
     }
 };
 
@@ -62,16 +75,16 @@ export const handleSignOut = async () => {
     }
 };
 
-// Renamed to avoid conflict with the original onAuthStateChanged
 export const onFirebaseAuthStateChanged = (callback: (user: User | null) => void) => {
+    if (typeof window === "undefined") return () => { };
     ensureAuthInitialized();
     return onAuthStateChanged(auth, callback);
 };
+
 export const getCurrentUser = async () => {
     ensureAuthInitialized();
-    return auth.currentUser;
+    return auth?.currentUser;
 }
-
 
 export { handleSignOut as signOut };
 export type { User };

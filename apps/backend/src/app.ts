@@ -1,12 +1,14 @@
 import express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
-import { logger } from '@/config/logger';
+import { logger, httpLogger } from '@/config/logger';
 import router from './routes';
 import path from 'path';
 import { errorHandler, apiLimiter, notFound } from '@/middlewares';
 
 const app = express();
+
+httpLogger(app);
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN || "http://localhost:3000",

@@ -16,7 +16,7 @@ export const completeUploadPartSchema = z.object({
 
 export const completeUploadSchema = z.object({
     fileId: z.string().cuid("Invalid File ID"),
-    parts: z.array(completeUploadPartSchema).min(1, "At least one part is required") // optional? logical to have at least 1 part if completing
+    parts: z.array(completeUploadPartSchema).min(1, "At least one part is required").optional()
 });
 
 export const abortUploadSchema = z.object({

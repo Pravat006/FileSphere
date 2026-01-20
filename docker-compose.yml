@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   postgres:
@@ -19,7 +19,7 @@ services:
     image: redis:alpine
     container_name: filesphere_redis
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     networks:

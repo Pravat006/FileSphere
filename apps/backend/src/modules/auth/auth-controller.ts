@@ -15,6 +15,7 @@ import { ApiError } from "@/interface";
  * This endpoint is called after Firebase authentication
  */
 export const createNewUser = asyncHandler(async (req, res) => {
+    // getAuthToken now throws ApiError with proper status codes
     const decodedToken = await getAuthToken(req);
     const { uid, email, name } = decodedToken;
 
@@ -22,14 +23,22 @@ export const createNewUser = asyncHandler(async (req, res) => {
         throw new ApiError(status.BAD_REQUEST, 'Firebase UID is required');
     }
 
+    // Ensure email is provided (Firebase might not return it for all providers)
+    // If your DB schema requires unique email, this is critical to prevent collisions.
+    if (!email) {
+        throw new ApiError(status.BAD_REQUEST, 'Email is required for registration');
+    }
+
     // Check if user already exists
-    let user = await db.user.findUnique({
-        where: { firebaseUid: uid },
+    // Using findFirst with include to ensure we get the full user profile if found
+    const existingUser = await db.user.findFirst({
+        where: { firebaseUid: uid as string },
+        include: { plan: true }
     });
 
-    if (user) {
+    if (existingUser) {
         return res.status(status.OK).json(
-            new ApiResponse(status.OK, 'User already exists', serializeBigInt(user))
+            new ApiResponse(status.OK, 'User already exists', serializeBigInt(existingUser))
         );
     }
 
@@ -39,44 +48,60 @@ export const createNewUser = asyncHandler(async (req, res) => {
     });
 
     if (!freePlan) {
-        throw new ApiError(status.INTERNAL_SERVER_ERROR, 'Free plan not found. Please contact support.');
+        throw new ApiError(status.INTERNAL_SERVER_ERROR, 'System setup error: Free plan not found.');
     }
 
-    // Create new user with related data in a transaction
-    const result = await db.$transaction(async (tx: Prisma.TransactionClient) => {
-        const newUser = await tx.user.create({
-            data: {
-                firebaseUid: uid,
-                email: email || '',
-                name: name || null,
-                planId: freePlan.id,
-                // Create default folder with user
-                folders: {
-                    create: {
-                        name: 'My Drive',
+    try {
+        // Create new user with related data in a transaction
+        const result = await db.$transaction(async (tx: Prisma.TransactionClient) => {
+            const newUser = await tx.user.create({
+                data: {
+                    firebaseUid: uid,
+                    email: email,
+                    name: name || null,
+                    planId: freePlan.id,
+                    // Create default folder with user
+                    folders: {
+                        create: {
+                            name: 'My Drive',
+                        }
+                    },
+                    // Create subscription history
+                    subscriptions: {
+                        create: {
+                            planId: freePlan.id,
+                            startDate: new Date(),
+                        }
                     }
                 },
-                // Create subscription history
-                subscriptions: {
-                    create: {
-                        planId: freePlan.id,
-                        startDate: new Date(),
-                    }
+                include: {
+                    plan: true,
+                    folders: true,
+                    subscriptions: true
                 }
-            },
-            include: {
-                plan: true,
-                folders: true,
-                subscriptions: true
-            }
+            });
+
+            return newUser;
         });
 
-        return newUser;
-    });
+        return res.status(status.CREATED).json(
+            new ApiResponse(status.CREATED, 'User created successfully', serializeBigInt(result))
+        );
 
-    return res.status(status.CREATED).json(
-        new ApiResponse(status.CREATED, 'User created successfully', serializeBigInt(result))
-    );
+    } catch (error: any) {
+        // Handle race conditions (If two requests hit simultaneously)
+        // P2002 is Prisma's code for Unique Constraint violation
+        if (error.code === 'P2002') {
+            const reFetchedUser = await db.user.findUnique({
+                where: { firebaseUid: uid },
+                include: { plan: true }
+            });
+            return res.status(status.OK).json(
+                new ApiResponse(status.OK, 'User already exists', serializeBigInt(reFetchedUser))
+            );
+        }
+        throw error;
+    }
 });
 
 /**

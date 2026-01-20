@@ -1,24 +1,26 @@
-const getFileType = (mimetype: string): string => {
+import { FileType } from "@repo/db";
+
+const getFileType = (mimetype: string): FileType => {
     const type = mimetype.split('/')[0].toLowerCase();
 
     switch (type) {
         case 'image':
-            return 'IMAGE';
+            return FileType.IMAGE;
         case 'video':
-            return 'VIDEO';
+            return FileType.VIDEO;
         case 'audio':
-            return 'AUDIO';
+            return FileType.AUDIO;
         case 'application':
             // Handle specific application types
-            if (mimetype.includes('pdf')) return 'DOCUMENT';
-            if (mimetype.includes('zip') || mimetype.includes('rar')) return 'ARCHIVE';
-            if (mimetype.includes('msword') || mimetype.includes('excel') || mimetype.includes('powerpoint')) return 'DOCUMENT';
-            return 'DOCUMENT';
+            if (mimetype.includes('pdf')) return FileType.DOCUMENT;
+            if (mimetype.includes('zip') || mimetype.includes('rar')) return FileType.ARCHIVE;
+            if (mimetype.includes('msword') || mimetype.includes('excel') || mimetype.includes('powerpoint')) return FileType.DOCUMENT;
+            return FileType.DOCUMENT;
         case 'text':
-            return 'DOCUMENT';
+            return FileType.DOCUMENT;
         default:
-            return 'OTHER';
+            return FileType.OTHER;
     }
 };
 
-export default getFileType
+export default getFileType;

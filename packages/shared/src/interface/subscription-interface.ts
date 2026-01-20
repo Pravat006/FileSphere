@@ -1,4 +1,4 @@
-import { PlanType, TransactionStatus } from '@/constants';
+import { PlanType, TransactionStatus } from '../constants';
 import { IUser, IAdmin } from './auth-interface';
 
 

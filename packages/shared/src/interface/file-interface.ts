@@ -1,5 +1,5 @@
 
-import { FileType } from '@/constants';
+import { FileType } from '../constants';
 import { IUser } from './auth-interface';
 
 

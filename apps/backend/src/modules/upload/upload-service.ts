@@ -1,4 +1,5 @@
 import { abortMultipartUpload, completeMultiPartUpload, createMultipartUpload, decideStrategy, deleteObject, getPutObjectUrl, getUploadPartUrl } from "@/config/s3-config";
+import getFileType from "@/helper/get-fileType";
 import { ApiError, ApiResponse } from "@/interface";
 import db from "@/services/db";
 import { redis } from "@/services/redis-service";
@@ -20,6 +21,7 @@ type UploadOptions = {
  */
 export const initiateUpload = async (options: UploadOptions) => {
     const strategy = decideStrategy(options.size);
+    const fileType = getFileType(options.mimeType);
     const file = await db.file.create({
         data: {
             filename: options.filename,
@@ -29,7 +31,8 @@ export const initiateUpload = async (options: UploadOptions) => {
             folderId: options.folderId,
             uploadStrategy: strategy,
             uploadStatus: "INITIATED",
-            storageKey: ""
+            storageKey: "",
+            fileType: fileType
         }
     });
 

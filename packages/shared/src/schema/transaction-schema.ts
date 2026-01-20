@@ -1,4 +1,4 @@
-import { TransactionStatusEnum } from "@/constants";
+import { TransactionStatusEnum } from "../constants";
 import z from "zod";
 
 export const transactionSchema = z.object({

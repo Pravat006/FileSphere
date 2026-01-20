@@ -1,4 +1,4 @@
-import { allowedMimeTypes, FileTypeEnum, FileAccessEnum } from "@/constants";
+import { allowedMimeTypes, FileTypeEnum, FileAccessEnum } from "../constants";
 import { z } from "zod";
 
 export const fileSchema = z.object({
