@@ -154,6 +154,8 @@ enum FileType {
   VIDEO
   AUDIO
   DOCUMENT
+  ARCHIVE
+  OTHER
 }
 
 enum Plan {

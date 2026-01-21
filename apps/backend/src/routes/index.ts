@@ -1,8 +1,9 @@
 import { authRouter } from "@/modules/auth/auth-route";
 import { Router } from "express";
 import { uploadRouter } from "@/modules/upload/upload-routes"
-const router = Router()
+import { fileRouter } from "@/modules/file/file-route";
 
+const router = Router()
 
 type Route = {
     path: string,
@@ -10,7 +11,6 @@ type Route = {
 }
 
 const routeModules: Route[] = [
-
     {
         path: '/auth',
         route: authRouter
@@ -18,6 +18,10 @@ const routeModules: Route[] = [
     {
         path: '/upload',
         route: uploadRouter
+    },
+    {
+        path: '/file',
+        route: fileRouter
     }
 ]
 
