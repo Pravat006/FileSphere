@@ -28,6 +28,21 @@ export const getFilesController = asyncHandler(async (req, res) => {
     res.status(status.OK).json(new ApiResponse(status.OK, "Files retrieved", result));
 });
 
+/**
+ * Global Search for Files and Folders
+ */
+export const globalSearchController = asyncHandler(async (req, res) => {
+    const userId = req.user?.id as string;
+    const { q } = req.query;
+
+    if (!q) {
+        throw new ApiError(status.BAD_REQUEST, "Search query is required");
+    }
+
+    const result = await fileService.globalSearch(userId, q as string);
+    res.status(status.OK).json(new ApiResponse(status.OK, "Search results retrieved", result));
+});
+
 
 /**
  * Get file by ID

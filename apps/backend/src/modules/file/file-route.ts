@@ -1,6 +1,6 @@
 import { Router } from "express";
 import userAuthMiddleware from "@/middlewares/user-auth-middleware";
-import { copyFileToFolder, downloadFile, emptyTrash, getFileById, getFilesController, getTrashFiles, moveFileToFolder, moveFileToTrash, permanentlyDeleteFile, restoreFileFromTrash, toggleFileAccess, updateFileMetadata } from "./file-controller";
+import { copyFileToFolder, downloadFile, emptyTrash, getFileById, getFilesController, getTrashFiles, globalSearchController, moveFileToFolder, moveFileToTrash, permanentlyDeleteFile, restoreFileFromTrash, toggleFileAccess, updateFileMetadata } from "./file-controller";
 
 const router = Router();
 
@@ -9,6 +9,7 @@ router.use(userAuthMiddleware);
 
 // General Query & List
 router.get("/", getFilesController);
+router.get("/search", globalSearchController);
 router.get("/trash", getTrashFiles);
 router.get("/:id", getFileById);
 

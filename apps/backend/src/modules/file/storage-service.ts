@@ -2,7 +2,7 @@ import { deleteObject } from "@/config/s3-config";
 import db from "@/services/db";
 import { ApiError } from "@/interface";
 import status from "http-status";
-import { Prisma } from "@repo/db";
+import { redis } from "@/services";
 
 class StorageService {
     /**
@@ -54,10 +54,14 @@ class StorageService {
 
             // Update user storage quota
             if (file.uploadStatus === "COMPLETED") {
-                await tx.user.update({
+                const updatedUser = await tx.user.update({
                     where: { id: userId },
-                    data: { storageUsed: { decrement: file.size } }
+                    data: { storageUsed: { decrement: file.size } },
+                    select: { firebaseUid: true }
                 });
+
+                // Invalidate cache
+                await redis.delete(`user:${updatedUser.firebaseUid}`);
             }
 
             return { deletedFromCloud: !isReferenced };
@@ -106,10 +110,14 @@ class StorageService {
                 .reduce((acc, f) => acc + BigInt(f.size), BigInt(0));
 
             if (totalSize > 0n) {
-                await tx.user.update({
+                const updatedUser = await tx.user.update({
                     where: { id: userId },
-                    data: { storageUsed: { decrement: totalSize } }
+                    data: { storageUsed: { decrement: totalSize } },
+                    select: { firebaseUid: true }
                 });
+
+                // Invalidate cache
+                await redis.delete(`user:${updatedUser.firebaseUid}`);
             }
 
             return {

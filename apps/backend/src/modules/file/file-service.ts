@@ -62,6 +62,35 @@ class FileService {
         }
     }
 
+    /**
+     * Global search for files and folders
+     */
+    async globalSearch(userId: string, query: string) {
+        try {
+            const [files, folders] = await Promise.all([
+                db.file.findMany({
+                    where: {
+                        ownerId: userId,
+                        filename: { contains: query, mode: 'insensitive' },
+                        isInTrash: false
+                    },
+                    take: 10
+                }),
+                db.folder.findMany({
+                    where: {
+                        ownerId: userId,
+                        name: { contains: query, mode: 'insensitive' }
+                    },
+                    take: 10
+                })
+            ]);
+
+            return { files, folders };
+        } catch (error) {
+            throw new ApiError(status.INTERNAL_SERVER_ERROR, "Global search failed", String(error));
+        }
+    }
+
     async getFileById(fileId: string, ownerId: string) {
         try {
             const file = await db.file.findFirst({
