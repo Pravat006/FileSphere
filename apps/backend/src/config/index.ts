@@ -20,7 +20,10 @@ const envSchema = z.object({
     AWS_ACCESS_KEY_ID: z.string(),
     AWS_SECRET_ACCESS_KEY: z.string(),
     S3_BUCKET_NAME: z.string(),
-    REDIS_URL: z.string()
+    REDIS_URL: z.string(),
+    RAZORPAY_KEY_ID: z.string(),
+    RAZORPAY_KEY_SECRET: z.string(),
+    RAZORPAY_WEBHOOK_SECRET: z.string()
 })
 
 let envVars: z.infer<typeof envSchema>;
