@@ -1,0 +1,9 @@
+process.env.AWS_ACCESS_KEY_ID = 'dummy';
+process.env.AWS_SECRET_ACCESS_KEY = 'dummy';
+process.env.S3_BUCKET_NAME = 'dummy';
+process.env.REDIS_URL = 'redis://localhost:6379';
+process.env.RAZORPAY_KEY_ID = 'dummy';
+process.env.RAZORPAY_KEY_SECRET = 'dummy';
+process.env.RAZORPAY_WEBHOOK_SECRET = 'dummy';
+process.env.NODE_ENV = 'test';
+process.env.PORT = '3001';
