@@ -1,13 +1,19 @@
 import { NextFunction, Request, Response } from "express";
-import { AnyZodObject, ZodError } from "zod";
+import { ZodError } from "zod";
 import status from "http-status";
+import { logger } from "@/config/logger";
 
-export const validateRequest = (schema: AnyZodObject) => (req: Request, res: Response, next: NextFunction) => {
+export const validateRequest = (schema: any) => (req: Request, res: Response, next: NextFunction) => {
     try {
-        schema.parse(req.body);
+        req.body = schema.parse(req.body);
         next();
     } catch (error) {
         if (error instanceof ZodError) {
+            logger.error("[VALIDATION ERROR]", {
+                url: req.url,
+                body: req.body,
+                errors: error.errors
+            });
             return res.status(status.BAD_REQUEST).json({
                 success: false,
                 message: "Validation Error",

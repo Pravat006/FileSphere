@@ -6,10 +6,6 @@ import { CreateSubscriptionPlanRequest, UpdateSubscriptionPlanRequest } from "@r
 import { serializeBigInt } from "@/utils/serialize-bigint";
 import { ApiError } from "@/interface";
 
-
-
-
-
 /**
  * Create a new subscription plan
  */
@@ -18,7 +14,7 @@ export const createSubscriptionPlanController = asyncHandler(async (req, res) =>
     if (!adminId) {
         throw new ApiError(status.UNAUTHORIZED, "Admin not authenticated");
     }
-    223
+
     const body = req.body as CreateSubscriptionPlanRequest;
 
     const plan = await subscriptionPlanService.createPlan(body, adminId);
@@ -76,13 +72,10 @@ export const deleteSubscriptionPlanController = asyncHandler(async (req, res) =>
     );
 });
 
-
-
 /**
  * get subscription details by id
  * probably stats for admin
  */
-
 export const getScriptionPlanStats = asyncHandler(
     async (req, res) => {
         const { planId } = req.body;

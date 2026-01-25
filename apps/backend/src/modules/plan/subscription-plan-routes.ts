@@ -1,5 +1,4 @@
 import { Router } from "express";
-import adminMiddleware from "@/middlewares/admin-auth-middleware";
 import {
     createSubscriptionPlanController,
     deleteSubscriptionPlanController,
@@ -8,6 +7,7 @@ import {
 } from "./subscription-plan-controller";
 import { validateRequest } from "@/middlewares";
 import { createSubscriptionPlanSchema, updateSubscriptionPlanSchema } from "@repo/shared";
+import adminMiddleware from "@/middlewares/admin-auth-middleware";
 
 const router = Router();
 

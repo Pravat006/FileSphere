@@ -100,7 +100,7 @@ export const createNewUser = asyncHandler(async (req, res) => {
                 new ApiResponse(status.OK, 'User already exists', serializeBigInt(reFetchedUser))
             );
         }
-        throw error;
+        throw new ApiError(status.INTERNAL_SERVER_ERROR, error.message);
     }
 });
 

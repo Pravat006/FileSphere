@@ -10,7 +10,7 @@ export const subscriptionPlanSchema = z.object({
     id: z.string().cuid(),
     planType: planTypeEnum.default("FREE"),
     price: z.number().int().nonnegative().min(0).default(0),
-    storageLimit: z.bigint().default(BigInt(1073741824)),
+    storageLimit: z.any().transform((val) => BigInt(val)).default(BigInt(1073741824)),
     features: z.array(z.string()).default([]),
     createdAt: z.date(),
     updatedAt: z.date(),
@@ -20,14 +20,14 @@ export const subscriptionPlanSchema = z.object({
 export const createSubscriptionPlanSchema = z.object({
     planType: planTypeEnum,
     price: z.number().default(0),
-    storageLimit: z.bigint().nonnegative().default(BigInt(1073741824)),
+    storageLimit: z.any().transform((val) => BigInt(val)).default(BigInt(1073741824)),
     features: z.array(z.string()).default([]),
-    adminId: z.string().cuid()
+    adminId: z.string().cuid().optional()
 })
 
 export const updateSubscriptionPlanSchema = z.object({
     price: z.number().int().min(0).optional(),
-    storageLimit: z.bigint().optional(),
+    storageLimit: z.any().transform((val) => BigInt(val)).optional(),
     features: z.array(z.string()).optional()
 })
 
