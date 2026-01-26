@@ -2,6 +2,7 @@ module.exports = {
     expo: {
         name: 'FileSphere',
         slug: 'filesphere',
+        owner: 'pravat',
         version: '1.0.0',
         orientation: 'portrait',
         icon: './assets/images/icon.png',
@@ -10,8 +11,11 @@ module.exports = {
         newArchEnabled: true,
         ios: {
             supportsTablet: true,
+            bundleIdentifier: 'com.filesphere.mobile',
+
         },
         android: {
+            package: 'com.filesphere.mobile',
             adaptiveIcon: {
                 backgroundColor: '#E6F4FE',
                 foregroundImage: './assets/images/android-icon-foreground.png',
@@ -27,6 +31,7 @@ module.exports = {
         },
         plugins: [
             'expo-router',
+            'expo-dev-client',
             [
                 'expo-splash-screen',
                 {
