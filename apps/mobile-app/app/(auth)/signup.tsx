@@ -44,14 +44,15 @@ export default function Signup() {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1 bg-white"
+            className="flex-1 bg-primary-dark/20"
         >
             <ScrollView
                 contentContainerClassName="flex-grow"
                 keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
             >
-                <View className="h-64 bg-green-500 rounded-b-[40px] overflow-hidden">
+                {/* Hero Image Section */}
+                <View className="h-64 bg-primary-dark rounded-b-[40px] overflow-hidden">
                     <View className="flex-1 items-center justify-center px-6">
                         <Text className="text-white text-4xl font-bold mb-2">FileSphere</Text>
                         <Text className="text-white/90 text-base">Create an account</Text>
@@ -101,6 +102,7 @@ export default function Signup() {
                             </View>
                         </View>
 
+                        {/* Terms Agreement */}
                         <TouchableOpacity
                             className="flex-row items-start mb-6"
                             onPress={() => setAgreeToTerms(!agreeToTerms)}
@@ -140,7 +142,7 @@ export default function Signup() {
                                 disabled
                             >
                                 <Ionicons name="logo-google" size={20} color="#4285F4" />
-                                <Text className="ml-2 text-gray-700 font-medium text-sm">Google Play</Text>
+                                <Text className="ml-2 text-gray-700 font-medium text-sm">Continue with Google</Text>
                             </TouchableOpacity>
 
 

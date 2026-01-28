@@ -112,8 +112,7 @@ export default function VerifyEmail() {
 
     return (
         <View className="flex-1 bg-white">
-            {/* Header */}
-            <View className="h-64 bg-green-500 rounded-b-[40px] items-center justify-center px-6">
+            <View className="h-64 bg-primary rounded-b-[40px] items-center justify-center px-6">
                 <View className="w-24 h-24 bg-white rounded-full items-center justify-center mb-4">
                     <Ionicons name="mail-outline" size={48} color="#22C55E" />
                 </View>
@@ -124,29 +123,27 @@ export default function VerifyEmail() {
                 <Text className="text-white font-semibold text-base mt-1">{email}</Text>
             </View>
 
-            {/* Content Card */}
             <View className="flex-1 px-6 -mt-8">
                 <View className="bg-white rounded-3xl shadow-lg p-6">
-                    {/* Instructions */}
                     <View className="mb-6">
                         <Text className="text-gray-800 text-lg font-semibold mb-4">
                             📧 Check Your Email
                         </Text>
                         <View className="space-y-3">
                             <View className="flex-row items-start">
-                                <Text className="text-green-500 text-lg mr-2">1.</Text>
+                                <Text className="text-primary text-lg mr-2">1.</Text>
                                 <Text className="text-gray-600 flex-1">
                                     Open your email inbox (check spam folder too!)
                                 </Text>
                             </View>
                             <View className="flex-row items-start">
-                                <Text className="text-green-500 text-lg mr-2">2.</Text>
+                                <Text className="text-primary text-lg mr-2">2.</Text>
                                 <Text className="text-gray-600 flex-1">
                                     Click the verification link in the email
                                 </Text>
                             </View>
                             <View className="flex-row items-start">
-                                <Text className="text-green-500 text-lg mr-2">3.</Text>
+                                <Text className="text-primary text-lg mr-2">3.</Text>
                                 <Text className="text-gray-600 flex-1">
                                     Come back here and tap "I've Verified My Email"
                                 </Text>
@@ -154,9 +151,8 @@ export default function VerifyEmail() {
                         </View>
                     </View>
 
-                    {/* Verify Button */}
                     <TouchableOpacity
-                        className={`rounded-2xl py-4 items-center mb-3 ${isChecking ? 'bg-green-400' : 'bg-green-500'}`}
+                        className={`rounded-2xl py-4 items-center mb-3 ${isChecking ? 'bg-primary/70' : 'bg-primary'}`}
                         onPress={checkVerification}
                         disabled={isChecking || isResending}
                     >
@@ -169,14 +165,14 @@ export default function VerifyEmail() {
 
                     {/* Resend Button */}
                     <TouchableOpacity
-                        className={`rounded-2xl py-4 items-center mb-3 border-2 ${isResending ? 'border-gray-300' : 'border-green-500'}`}
+                        className={`rounded-2xl py-4 items-center mb-3 border-2 ${isResending ? 'border-gray-300' : 'border-primary'}`}
                         onPress={resendEmail}
                         disabled={isChecking || isResending}
                     >
                         {isResending ? (
                             <ActivityIndicator color="#22C55E" />
                         ) : (
-                            <Text className="text-green-600 font-semibold text-base">Resend Verification Email</Text>
+                            <Text className="text-primary font-semibold text-base">Resend Verification Email</Text>
                         )}
                     </TouchableOpacity>
 

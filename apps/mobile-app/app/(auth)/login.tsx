@@ -107,7 +107,7 @@ export default function Login() {
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            className="flex-1 bg-white"
+            className="flex-1 bg-primary-light"
         >
             <ScrollView
                 contentContainerClassName="flex-grow"
@@ -115,7 +115,7 @@ export default function Login() {
                 showsVerticalScrollIndicator={false}
             >
                 {/* Hero Image Section */}
-                <View className="h-64 bg-sky-600 rounded-b-[40px] overflow-hidden">
+                <View className="h-64 bg-primary rounded-b-[40px] overflow-hidden">
                     <View className="flex-1 items-center justify-center px-6">
                         <Text className="text-white text-4xl font-bold mb-2">FileSphere</Text>
                         <Text className="text-white/90 text-base">Log in to your account</Text>
@@ -215,7 +215,7 @@ export default function Login() {
                                 ) : (
                                     <>
                                         <Ionicons name="logo-google" size={20} color="#4285F4" />
-                                        <Text className="ml-2 text-gray-700 font-medium text-sm">Google Play</Text>
+                                        <Text className="ml-2 text-gray-700 font-medium text-sm">Continue with Google</Text>
                                     </>
                                 )}
                             </TouchableOpacity>
@@ -225,7 +225,7 @@ export default function Login() {
                         <View className="flex-row justify-center">
                             <Text className="text-gray-600 text-sm">Don't have an account? </Text>
                             <TouchableOpacity onPress={() => router.push('/(auth)/signup')}>
-                                <Text className="text-green-600 font-semibold text-sm">Sign up</Text>
+                                <Text className="text-primary-dark font-semibold text-sm">Sign up</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

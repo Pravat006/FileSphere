@@ -100,7 +100,6 @@ class SubscriptionService {
         paymentId: string,
         signature: string | null
     ) {
-
         /**
          *  1.update transaction
          * 2. get plan from the transaction 
@@ -111,7 +110,6 @@ class SubscriptionService {
          * 6. update user's current plan ( if immediate)
          * 
          */
-
         try {
             return await db.$transaction(async (tx: Prisma.TransactionClient) => {
 
@@ -292,7 +290,7 @@ class SubscriptionService {
             transaction.id,
             transaction.ownerId,
             paymentId,
-            "" // Empty signature
+            ""
         )
     }
 

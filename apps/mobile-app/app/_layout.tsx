@@ -1,11 +1,9 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import 'react-native-reanimated';
 import '../global.css';
-// Initialize Firebase before anything else
 import '@/lib/firebase';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';

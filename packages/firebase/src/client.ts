@@ -11,7 +11,6 @@ import {
     initializeAuth,
     signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword,
     signInWithCredential,
-    // createUserWithEmailAndPassword,
     deleteUser
 } from "firebase/auth";
 
@@ -39,10 +38,9 @@ export const initializeFirebaseClient = (
 
     if (!auth) {
         if (persistence) {
-            // React Native Path - persistence needs to be in an array
             try {
                 auth = initializeAuth(app, {
-                    persistence: [persistence]
+                    persistence: persistence
                 });
             } catch (e: any) {
                 if (e.code === 'auth/already-initialized') {
@@ -52,7 +50,6 @@ export const initializeFirebaseClient = (
                 }
             }
         } else {
-            // Web/Default Path
             auth = getAuth(app);
         }
     }

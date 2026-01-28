@@ -19,7 +19,6 @@ export type {
     ITransaction,
 } from '@repo/shared';
 
-// API Response wrapper (matches backend ApiResponse)
 export interface ApiResponse<T = any> {
     statusCode: number;
     message: string;
@@ -27,7 +26,6 @@ export interface ApiResponse<T = any> {
     success: boolean;
 }
 
-// Type aliases for convenience - using the imported types
 export type User = IUser;
 export type File = IFile;
 export type Folder = IFolder;

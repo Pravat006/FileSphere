@@ -14,10 +14,6 @@ export const useEmailAuth = () => {
             const result = await signInWithEmailAndPassword(email, password);
             if (result.error) throw new Error(result.error);
 
-            // 2. Ensure user exists in backend (sync)
-            // We use ensureUserExists here to allow login to function even if backend user is missing (it creates it)
-            // await authService.createUser();
-
             return { user: result.user, error: null };
         } catch (err: any) {
             const message = err.message || 'Failed to sign in';
@@ -37,7 +33,6 @@ export const useEmailAuth = () => {
             if (result.error) throw new Error(result.error);
 
             // 2. Call backend to create user record immediately
-            // User requested explicit createUser call
             await authService.createUser();
 
             return { user: result.user, error: null };

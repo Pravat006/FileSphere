@@ -1,26 +1,2 @@
 @import 'tailwindcss/preflight';
 @import 'tailwindcss/utilities';
-
-
-
-:root{
-    --color-primary: #2872A1;
-    --color-primary-dark: #16a34a;
-    --color-primary-light: #4ade80;
-    --color-primary-light-2: #4ade80;
-    --color-secondary: #CBDDE9;
-    --color-secondary-dark: #16a34a;
-    --color-secondary-light: #4ade80;
-    --color-secondary-light-2: #4ade80;
-}
-
-@theme {
-    --color-primary: var(--color-primary);
-    --color-primary-dark: var(--color-primary-dark);
-    --color-primary-light: var(--color-primary-light);
-    --color-primary-light-2: var(--color-primary-light-2);
-    --color-secondary: var(--color-secondary);
-    --color-secondary-dark: var(--color-secondary-dark);
-    --color-secondary-light: var(--color-secondary-light);
-    --color-secondary-light-2: var(--color-secondary-light-2);
-}

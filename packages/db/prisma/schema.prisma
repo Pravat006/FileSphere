@@ -62,7 +62,7 @@ model File {
   owner    User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId  String
   folder   Folder?    @relation("FileFolder", fields: [folderId], references: [id], onDelete: SetNull) // Change onDelete
-  folderId String? //  Optional when file is in trash
+  folderId String?
   mimeType String
 
   // cloud metadata
@@ -84,8 +84,8 @@ model File {
   isInTrash Boolean @default(false)
 
   // Metadata for restoration
-  originalFolderId String? // Where to restore the file
-  deletedAt        DateTime? // When it was deleted
+  originalFolderId String?
+  deletedAt        DateTime?
 
   @@index([folderId])
   @@index([ownerId, isInTrash])
