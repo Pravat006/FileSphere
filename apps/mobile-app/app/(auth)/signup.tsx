@@ -5,6 +5,7 @@ import { useEmailAuth } from '@/hooks/useEmailAuth';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function Signup() {
+    const [fullName, setFullName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -14,8 +15,8 @@ export default function Signup() {
     const { signUp, isLoading, error } = useEmailAuth();
 
     const handleSignup = async () => {
-        if (!email || !password) {
-            Alert.alert('Error', 'Please enter both email and password');
+        if (!fullName || !email || !password) {
+            Alert.alert('Error', 'Please fill in all fields');
             return;
         }
 
@@ -25,7 +26,7 @@ export default function Signup() {
         }
 
         try {
-            const result = await signUp(email, password);
+            const result = await signUp(email, password, fullName);
 
             if (result.error) {
                 Alert.alert('Signup Failed', "Email already in use");
@@ -62,6 +63,22 @@ export default function Signup() {
                 {/* Form Card */}
                 <View className="flex-1 px-6 -mt-8">
                     <View className="bg-white rounded-3xl shadow-lg p-6">
+                        {/* Full Name Input */}
+                        <View className="mb-4">
+                            <Text className="text-gray-700 text-sm font-medium mb-2">Full Name</Text>
+                            <View className="bg-gray-50 rounded-2xl border border-gray-200 px-4 py-2">
+                                <TextInput
+                                    className="text-base text-gray-900"
+                                    placeholder="John Doe"
+                                    placeholderTextColor="#9CA3AF"
+                                    autoCapitalize="words"
+                                    value={fullName}
+                                    onChangeText={setFullName}
+                                    editable={!isLoading}
+                                />
+                            </View>
+                        </View>
+
                         {/* Email Input */}
                         <View className="mb-4">
                             <Text className="text-gray-700 text-sm font-medium mb-2">Your Email Address</Text>

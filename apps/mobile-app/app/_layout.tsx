@@ -5,6 +5,7 @@ import React from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import '@/lib/firebase';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -49,16 +50,21 @@ function RootLayoutClient() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="subscription-history" options={{ headerShown: true, animation: "fade", animationDuration: 1000, headerLargeTitle: true, headerStyle: { backgroundColor: '#0ea7e4' }, headerBackTitle: "Back", title: "Subscription History", headerTitleStyle: { color: 'white' }, headerLargeTitleStyle: { color: 'white' } }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
 
+const queryClient = new QueryClient();
+
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootLayoutClient />
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RootLayoutClient />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }

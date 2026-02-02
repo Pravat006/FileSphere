@@ -16,6 +16,7 @@ module.exports = {
                 secondary: '#1A2517',
                 'secondary-dark': '#16a34a',
                 'secondary-light': '#ACC8A2',
+                'dark-foreground': "#9CA3AF"
             }
         },
     },

@@ -1,15 +1,12 @@
-// Fallback for using MaterialIcons on Android and web.
-
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
+// type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
 type IconSymbolName = keyof typeof MAPPING;
 
 /**
- * Add your SF Symbols to Material Icons mappings here.
  * - see Material Icons in the [Icons Directory](https://icons.expo.fyi).
  * - see SF Symbols in the [SF Symbols](https://developer.apple.com/sf-symbols/) app.
  */
@@ -19,8 +16,30 @@ const MAPPING = {
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
   'gear': 'settings',
+  'doc.fill': 'insert-drive-file',
+  'cloud.fill': 'cloud-upload',
+  'clock.fill': 'history',
+  'person.fill': 'person',
+  'magnifyingglass': 'search',
+  'plus': 'add',
+  'folder.fill': 'folder',
+  'star.fill': 'star',
+  'ellipsis': 'more-horiz',
+  'bell.fill': 'notifications',
+  'photo': 'image',
+  'doc.text': 'description',
+  'lock.fill': 'lock',
+  'shield.fill': 'security',
+  'iphone': 'smartphone',
+  'arrow.right.square.fill': 'logout',
+  'moon.fill': 'dark-mode',
+  'wifi': 'wifi',
+  'checkmark.seal.fill': 'verified',
+  'xmark.seal.fill': 'cancel',
+  'bolt.fill': 'bolt',
 
-} as IconMapping;
+} as const satisfies Partial<Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>>;
+
 
 /**
  * An icon component that uses native SF Symbols on iOS, and Material Icons on Android and web.
@@ -39,5 +58,5 @@ export function IconSymbol({
   style?: StyleProp<TextStyle>;
   weight?: SymbolWeight;
 }) {
-  return <MaterialIcons color={color} size={size} name={MAPPING[name]} style={style} />;
+  return <MaterialIcons color={color} size={size} name={MAPPING[name] as ComponentProps<typeof MaterialIcons>['name']} style={style} />;
 }

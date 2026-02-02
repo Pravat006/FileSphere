@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User } from 'firebase/auth'; // Type only
-import { onFirebaseAuthStateChanged, handleSignOut } from '@repo/firebase/client';
+import { onFirebaseAuthStateChanged, handleSignOut, updateProfile, User } from '@repo/firebase/client';
 import { authService } from '@/services/auth.service';
+
 
 type AuthContextType = {
     user: User | null;
@@ -27,9 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const unsubscribe = onFirebaseAuthStateChanged(async (user: User | null) => {
             if (user) {
                 try {
+                    await updateProfile(user, {
+                        displayName: user.displayName,
+                        photoURL: user.photoURL,
+                    });
                     await authService.createUser()
                 } catch (error) {
-                    console.error('❌ Failed to sync user with backend:', error);
+                    console.error(' Failed to sync user with backend:', error);
                 }
             }
             setUser(user);
