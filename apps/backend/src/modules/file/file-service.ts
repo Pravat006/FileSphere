@@ -34,6 +34,7 @@ class FileService {
         const where: Prisma.FileWhereInput = {
             ownerId: userId,
             isInTrash,
+            uploadStatus: "COMPLETED",
             folderId: folderId || (isInTrash ? undefined : null), // null means root
             fileType: fileType,
             filename: search ? { contains: search, mode: 'insensitive' } : undefined

@@ -81,8 +81,8 @@ export const initiateUpload = async (options: UploadOptions) => {
     }
 };
 
-// generate multipart URLs for multipart upload
 /**
+generate multipart URLs for multipart upload
  * 
  * @param fileId 
  * @param parts 

@@ -11,11 +11,23 @@ class UserService {
         const user = await db.user.findUnique({
             where: { id: userId },
             include: {
-                plan: true,
+                plan: {
+                    select: {
+                        id: true,
+                        planType: true,
+                        storageLimit: true,
+                        price: true
+                    }
+                },
                 _count: {
                     select: {
-                        files: true,
-                        folders: true
+                        files: {
+                            where: {
+                                uploadStatus: "COMPLETED",
+                            }
+                        },
+                        folders: true,
+                        subscriptions: true
                     }
                 }
             }
@@ -46,7 +58,8 @@ class UserService {
                 type: stat.fileType,
                 count: stat._count.id,
                 size: stat._sum.size || 0n
-            }))
+            })),
+            currentPlan: user.plan
         };
     }
 
@@ -60,7 +73,14 @@ class UserService {
                 name: data.name
             },
             include: {
-                plan: true
+                plan: {
+                    select: {
+                        id: true,
+                        planType: true,
+                        storageLimit: true,
+                        price: true
+                    }
+                }
             }
         });
 

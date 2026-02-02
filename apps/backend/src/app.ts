@@ -9,6 +9,10 @@ import { errorHandler, apiLimiter, notFound } from '@/middlewares';
 import status from 'http-status';
 
 const app = express();
+// Handle BigInt serialization
+(BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+};
 
 httpLogger(app);
 

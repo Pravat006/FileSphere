@@ -5,6 +5,10 @@ import { logger } from "./config/logger";
 
 dotenv.config({ path: "./.env" });
 
-app.listen(process.env.PORT || 3000, () => {
-    logger.info(`Server is running on http://localhost:${process.env.PORT || 3000}`);
+const PORT = Number(process.env.PORT) || 3000;
+const HOST = '0.0.0.0';
+
+app.listen(PORT, HOST, () => {
+    logger.info(`Server is running on http://localhost:${PORT}`);
+    logger.info(`Network access: http://10.85.58.209:${PORT}`);
 });

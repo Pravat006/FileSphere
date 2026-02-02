@@ -5,7 +5,7 @@ import {
     abortUpload,
     complete,
     initiateUpload,
-
+    getMultipartUrls
 } from "./upload-service";
 
 
@@ -25,7 +25,9 @@ export const initiateUploadController = asyncHandler(async (req, res) => {
 
     const upload = await initiateUpload({ filename, size, mimeType, ownerId: userId, folderId });
 
-    return res.status(status.OK).json(upload)
+    return res.status(status.OK).json(
+        new ApiResponse(status.OK, "Upload initiated successfully", upload)
+    )
 
 }
 )
@@ -56,3 +58,15 @@ export const abortUploadController = asyncHandler(async (req, res) => {
 })
 
 
+
+/**
+ * get multipart urls
+ */
+export const getMultipartUrlsController = asyncHandler(async (req, res) => {
+    const { fileId, parts } = req.body
+    const urls = await getMultipartUrls(fileId, parts)
+
+    return res.status(status.OK).json(
+        new ApiResponse(status.OK, "Multipart urls generated successfully", urls)
+    )
+})

@@ -220,11 +220,41 @@ class SubscriptionService {
                 where: {
                     userId: userId,
                 },
+
+                select: {
+                    id: true,
+                    planId: true,
+                    transactionId: true,
+                    startDate: true,
+                    endDate: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    plan: {
+                        select: {
+                            id: true,
+                            planType: true,
+                            price: true,
+                            features: true,
+                            storageLimit: true,
+                        }
+                    },
+                    transaction: {
+                        select: {
+                            id: true,
+                            razorpayOrderId: true,
+                            razorpayPaymentId: true,
+                            amount: true,
+                            status: true,
+                            createdAt: true,
+                        }
+                    }
+                },
                 orderBy: {
                     createdAt: "desc"
                 }
             })
         } catch (error) {
+            logger.error(`[GET_SUBSCRIPTION_HISTORY_SERVICE] Error:`, error);
             throw new ApiError(status.INTERNAL_SERVER_ERROR, "Failed to get subscription history", "GET_SUBSCRIPTION_HISTORY_SERVICE")
         }
     }

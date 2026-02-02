@@ -44,3 +44,25 @@ export interface ITransaction {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface ITransactionHistoryItem {
+    id: string;
+    planId: string;
+    transactionId: string | null;
+    startDate: string;
+    endDate: string | null;
+    createdAt: string;
+    updatedAt: string;
+    plan: {
+        id: string;
+        planType: string | PlanType;
+        price: number;
+        features: string[];
+        storageLimit: string;
+    };
+    transaction: {
+        id: string;
+        amount: number;
+        status: string;
+    } | null;
+}
