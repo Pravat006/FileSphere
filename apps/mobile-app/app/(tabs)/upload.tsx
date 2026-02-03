@@ -1,135 +1,19 @@
-import { useState } from 'react';
-import { View, TouchableOpacity, ScrollView, Alert, Platform } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker';
+import { View, TouchableOpacity, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
-import { uploadService } from '@/services/upload.service';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFileUpload } from '@/hooks/use-file-upload';
 
 export default function UploadScreen() {
-    const [file, setFile] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
-    const [fileId, setFileId] = useState<string | null>(null);
-    const [uploading, setUploading] = useState(false);
-    const [progress, setProgress] = useState(0);
-
-    const pickFile = async () => {
-        try {
-            const result = await DocumentPicker.getDocumentAsync({
-                type: '*/*',
-                copyToCacheDirectory: true,
-            });
-
-            if (result.canceled) return;
-            setFile(result.assets[0]);
-            setProgress(0);
-        } catch (err) {
-            console.log(err);
-            Alert.alert("Error", "Failed to pick file");
-        }
-    };
-
-    const handleUpload = async () => {
-        if (!file) return;
-        setUploading(true);
-        setProgress(0);
-
-        console.log({ file });
-
-
-        try {
-            // 1. Initiate Upload
-            const init = await uploadService.initiateUpload({
-                filename: file.name,
-                mimeType: file.mimeType || 'application/octet-stream',
-                size: file.size || 0,
-            });
-            setFileId(init.fileId)
-            const getBlob = (uri: string): Promise<Blob> => {
-                return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.onload = function () {
-                        resolve(xhr.response);
-                    };
-                    xhr.onerror = function () {
-                        reject(new TypeError('Network request failed'));
-                    };
-                    xhr.responseType = 'blob';
-                    xhr.open('GET', uri, true);
-                    xhr.send(null);
-                });
-            };
-
-            const blob = await getBlob(file.uri);
-
-            let parts: { ETag: string; PartNumber: number }[] = [];
-
-            if (init.strategy === 'MULTI_PART') {
-                const CHUNK_SIZE = 5 * 1024 * 1024;
-                const totalParts = Math.ceil(file.size! / CHUNK_SIZE);
-
-                const multipartUrls = await uploadService.getMultipartUrls(init.fileId, totalParts);
-                console.log({ multipartUrls });
-                let uploadedBytes = 0;
-
-                for (let i = 0; i < totalParts; i++) {
-                    const start = i * CHUNK_SIZE;
-                    const end = Math.min(start + CHUNK_SIZE, file.size!);
-                    const chunk = blob.slice(start, end, file.mimeType || 'application/octet-stream');
-
-                    const urlData = multipartUrls.find(u => u.partNumber === i + 1);
-                    if (!urlData) throw new Error(`Missing URL for part ${i + 1}`);
-
-                    const etag = await uploadService.uploadFileToS3(urlData.url, chunk as any, (chunkProgress) => {
-                        const chunkUploaded = (chunk.size * chunkProgress) / 100;
-                        const totalUploaded = uploadedBytes + chunkUploaded;
-                        const totalProgress = Math.round((totalUploaded / file.size!) * 100);
-                        setProgress(totalProgress);
-                    });
-                    if (!etag) throw new Error(`Failed to upload part ${i + 1}`);
-
-                    parts.push({
-                        ETag: etag,
-                        PartNumber: i + 1
-                    });
-
-                    uploadedBytes += chunk.size;
-                    const progress = Math.round((uploadedBytes / file.size!) * 100);
-                    setProgress(progress);
-                }
-            } else {
-                if (init.preSignedUrls && init.preSignedUrls.length > 0) {
-                    const uploadBlob = blob.slice(0, blob.size, file.mimeType || 'application/octet-stream');
-                    await uploadService.uploadFileToS3(init.preSignedUrls[0], uploadBlob as any, (p) => {
-                        setProgress(p);
-                    });
-                } else {
-                    throw new Error("No upload URL received");
-                }
-            }
-
-            // 4. Complete Upload
-            await uploadService.completeUpload({
-                fileId: init.fileId,
-                parts: parts.length > 0 ? parts : undefined
-            });
-
-            Alert.alert("Success", "File uploaded successfully!");
-            setFile(null);
-            setProgress(0);
-        } catch (e: any) {
-            console.error(e);
-            Alert.alert("Upload Failed", e.message || "An unknown error occurred");
-        } finally {
-            setUploading(false);
-        }
-    };
-
-    const handleAbortUpload = async () => {
-        setUploading(false);
-        setProgress(0);
-        setFile(null);
-        await uploadService.abortUpload(fileId!);
-    };
+    const {
+        file,
+        pickFile,
+        uploadFile,
+        clearFile,
+        uploading,
+        progress,
+        abortUpload
+    } = useFileUpload();
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return '0 B';
@@ -180,7 +64,7 @@ export default function UploadScreen() {
                                 </View>
                             </View>
                             {!uploading && (
-                                <TouchableOpacity onPress={() => setFile(null)} className="p-2">
+                                <TouchableOpacity onPress={clearFile} className="p-2">
                                     <IconSymbol name="xmark.seal.fill" size={20} color="#999" />
                                 </TouchableOpacity>
                             )}
@@ -222,7 +106,7 @@ export default function UploadScreen() {
 
                 {file && !uploading && (
                     <TouchableOpacity
-                        onPress={handleUpload}
+                        onPress={() => uploadFile()}
                         className="bg-primary py-4 rounded-2xl items-center shadow-md shadow-blue-200"
                     >
                         <ThemedText className="text-white font-bold text-lg">
@@ -233,7 +117,7 @@ export default function UploadScreen() {
 
                 {uploading && (
                     <TouchableOpacity
-                        onPress={handleAbortUpload}
+                        onPress={abortUpload}
                         className="bg-red-500 py-4 rounded-2xl items-center shadow-md shadow-blue-200"
                     >
                         <ThemedText className="text-white font-bold text-lg">
